@@ -1,0 +1,11 @@
+BIBLIA VIDA - GENERAR APK SIN ANDROID STUDIO
+
+1. Lea el archivo GUIA_SIN_ANDROID_STUDIO.md.
+2. Cree una cuenta gratuita en GitHub si todavía no tiene una.
+3. Cree un repositorio llamado biblia-vida.
+4. Suba TODO el contenido de esta carpeta, incluida la carpeta .github.
+5. Abra la pestaña Actions.
+6. Ejecute "Generar APK Biblia Vida".
+7. Descargue el artefacto "Biblia-Vida-APK".
+
+No necesita instalar Android Studio.

@@ -1,0 +1,12 @@
+{
+	"appId": "com.proca.bibliavida",
+	"appName": "Biblia Vida",
+	"webDir": "www",
+	"backgroundColor": "#071b34",
+	"android": {
+		"backgroundColor": "#071b34",
+		"allowMixedContent": false,
+		"captureInput": true,
+		"webContentsDebuggingEnabled": false
+	}
+}

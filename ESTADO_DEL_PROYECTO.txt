@@ -1,0 +1,18 @@
+BIBLIA VIDA v1.0.0
+==================
+
+Estado: Proyecto Android completo y listo para compilar.
+
+Pruebas superadas:
+- Carga de 66 libros.
+- Lectura de Génesis 1.
+- Navegación a Juan 3 y verificación de Juan 3:16.
+- Guardado de favoritos.
+- Búsqueda exacta de "Jehová es mi pastor" con resultado Salmos 23:1.
+- Sin errores JavaScript detectados durante las pruebas.
+- Proyecto Capacitor sincronizado con Android.
+- Manifiesto Android sin permiso INTERNET.
+
+Para obtener la APK:
+- Ejecutar ABRIR_EN_ANDROID_STUDIO.bat, o
+- seguir GUIA_GENERAR_APK.md.

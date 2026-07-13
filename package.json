@@ -1,0 +1,23 @@
+{
+  "name": "biblia-vida",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Biblia Vida - Reina-Valera 1909 offline, sin publicidad.",
+  "author": "Proca Corporación",
+  "license": "UNLICENSED",
+  "scripts": {
+    "android:add": "npx cap add android",
+    "android:sync": "npx cap sync android",
+    "android:copy": "npx cap copy android",
+    "android:open": "npx cap open android",
+    "serve": "npx http-server www -p 4173 -c-1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.1",
+    "http-server": "^14.1.1"
+  }
+}
