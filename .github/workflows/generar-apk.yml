@@ -2,6 +2,7 @@ name: Generar APK Biblia Vida
 
 on:
   workflow_dispatch:
+
   push:
     branches:
       - main
@@ -10,22 +11,28 @@ permissions:
   contents: read
 
 jobs:
+
   compilar-apk:
+
     name: Compilar APK Android
+
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Descargar proyecto
         uses: actions/checkout@v4
 
       - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
 
       - name: Instalar dependencias
-        run: npm ci
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          rm -f package-lock.json
+          npm install --no-audit --no-fund
 
       - name: Sincronizar Capacitor
         run: npx cap sync android
@@ -34,15 +41,14 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
-          cache: gradle
+          java-version: "21"
 
       - name: Dar permiso a Gradle
         run: chmod +x android/gradlew
 
       - name: Compilar APK
         working-directory: android
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Preparar APK
         run: |
