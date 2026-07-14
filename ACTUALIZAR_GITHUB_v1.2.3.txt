@@ -1,0 +1,17 @@
+BIBLIA VIDA v1.2.3 — APERTURA SEGURA DE LA BIBLIA DEL OSO
+
+1. Descomprime este ZIP.
+2. En GitHub abre el repositorio biblia-vida.
+3. Pulsa Add file > Upload files.
+4. Arrastra TODO lo que está dentro de esta carpeta, incluida la carpeta .github.
+5. Usa el commit: Corregir apertura Biblia del Oso v1.2.3
+6. En Actions espera el visto verde.
+7. Abre la ejecución verde y descarga el artefacto Biblia-Vida-APK.
+8. Descomprime el artefacto e instala Biblia-Vida-v1.2.3.apk.
+
+IMPORTANTE:
+No descargues un APK viejo desde Releases. El APK correcto sale dentro del artefacto de la ejecución nueva de Actions.
+
+PROTECCIÓN DOBLE:
+- GitHub Actions integra biblia-oso1569.json dentro del APK.
+- Si el archivo llegara a faltar, la app lo descarga una sola vez y lo guarda para lectura sin conexión.

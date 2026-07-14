@@ -1,5 +1,13 @@
 # Historial de cambios
 
+## 1.2.3 — 14 de julio de 2026
+
+- Corrige el caso en que `biblia-oso1569.json` no quedó dentro del APK.
+- Primero intenta abrir la Biblia del Oso incluida localmente.
+- Si el archivo faltara, recupera una copia guardada o la descarga una sola vez desde GetBible y la conserva para lectura sin conexión.
+- Agrega el permiso de Internet únicamente para esa recuperación de emergencia.
+- Android `versionCode 6` y `versionName 1.2.3`.
+
 ## 1.2.2 — 14 de julio de 2026
 
 - Corrige definitivamente la apertura de la Biblia del Oso 1569.

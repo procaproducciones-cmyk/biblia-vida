@@ -1,0 +1,17 @@
+BIBLIA VIDA v1.2.3 — CORRECCIÓN DE APERTURA BIBLIA DEL OSO
+
+CAUSA ENCONTRADA:
+El proyecto intentaba abrir:
+www/data/biblia-oso1569.json
+pero ese archivo no estaba dentro del ZIP ni dentro de los recursos Android incluidos en el proyecto.
+
+CORRECCIÓN APLICADA:
+1. La app sigue intentando abrir primero el archivo local incluido por GitHub Actions.
+2. Si por alguna razón el archivo falta dentro del APK, la app usa una copia guardada.
+3. Si tampoco hay copia guardada, descarga la Biblia del Oso una sola vez desde GetBible y la guarda para usarla sin conexión.
+4. Se agregó el permiso INTERNET para permitir esa recuperación de emergencia.
+5. Se aumentó la versión a 1.2.3 (versionCode 6).
+
+PARA GENERAR EL APK:
+Sube todo el contenido de esta carpeta al repositorio de GitHub y deja que Actions termine con visto verde.
+Descarga el artefacto Biblia-Vida-APK y dentro estará Biblia-Vida-v1.2.3.apk.

@@ -29,6 +29,7 @@ const BIBLE_VERSIONS = {
     icon: '🐻',
     source: 'local',
     path: 'data/biblia-oso1569.json',
+    url: 'https://api.getbible.net/v2/sse.json',
     description: 'Sagradas Escrituras Versión Antigua (1569), edición digital de lectura con ortografía actualizada. Viene incluida dentro de la aplicación y funciona sin conexión.'
   }
 };
@@ -1089,12 +1090,49 @@ async function loadBibleVersion(versionId, options = {}) {
   const config = currentVersionConfig(versionId);
 
   if (config.source === 'local') {
-    const response = await fetch(config.path, { cache: 'force-cache' });
-    if (!response.ok) throw new Error(`No se pudo cargar la Biblia (${response.status})`);
-    const bible = await response.json();
-    if (!Array.isArray(bible.books) || bible.books.length !== 66) throw new Error('El archivo bíblico no es válido');
-    state.bibleCache[versionId] = bible;
-    return bible;
+    try {
+      const response = await fetch(config.path, { cache: 'force-cache' });
+      if (!response.ok) throw new Error(`No se pudo cargar la Biblia (${response.status})`);
+      const bible = await response.json();
+      if (!Array.isArray(bible.books) || bible.books.length !== 66) throw new Error('El archivo bíblico no es válido');
+      state.bibleCache[versionId] = bible;
+      return bible;
+    } catch (localError) {
+      if (versionId !== 'oso1569') throw localError;
+
+      console.warn('No se encontró la Biblia del Oso incluida. Se intentará recuperar la copia guardada o descargarla:', localError);
+
+      try {
+        let cached = await bibleDbGet(OSO1569_CACHE_KEY);
+        if (!cached) {
+          const legacyCached = await bibleDbGet(LEGACY_OSO1569_CACHE_KEY);
+          if (legacyCached?.books?.length === 66) {
+            cached = {
+              ...legacyCached,
+              metadata: {
+                ...(legacyCached.metadata || {}),
+                name: 'Biblia del Oso 1569',
+                abbreviation: 'Oso 1569',
+                sourceCatalogName: 'Sagradas Escrituras (1569)',
+                editorialNotice: 'Edición digital con ortografía actualizada; no es un facsímil ni una transcripción letra por letra de la impresión de 1569.'
+              }
+            };
+            await bibleDbPut(OSO1569_CACHE_KEY, cached);
+          }
+        }
+        if (cached?.books?.length === 66) {
+          state.bibleCache[versionId] = cached;
+          return cached;
+        }
+      } catch (cacheError) {
+        console.warn('No se pudo recuperar la copia guardada de la Biblia del Oso:', cacheError);
+      }
+
+      if (options.allowDownload === false) return null;
+      const bible = await downloadOso1569Bible();
+      state.bibleCache[versionId] = bible;
+      return bible;
+    }
   }
 
   if (config.source === 'bundled') {
