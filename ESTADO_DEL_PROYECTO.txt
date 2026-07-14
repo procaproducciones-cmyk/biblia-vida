@@ -1,4 +1,4 @@
-BIBLIA VIDA v1.2.1
+BIBLIA VIDA v1.2.2
 ==================
 
 Estado: Proyecto Android actualizado y listo para compilar.
@@ -11,7 +11,7 @@ Cambios integrados:
 - Cambio de versión conservando libro y capítulo.
 - Migración desde el identificador provisional rv1865 de v1.1.0.
 - Permiso INTERNET usado exclusivamente para la descarga opcional.
-- versionCode 4 / versionName 1.2.1.
+- versionCode 5 / versionName 1.2.2.
 
 Comprobaciones realizadas:
 - Archivo RVR 1909 válido: 66 libros, 1,189 capítulos y 31,102 versículos.

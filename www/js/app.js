@@ -27,8 +27,8 @@ const BIBLE_VERSIONS = {
     shortName: 'Oso 1569',
     name: 'Biblia del Oso 1569',
     icon: '🐻',
-    source: 'bundled',
-    path: 'data/biblia-oso1569-api.json',
+    source: 'local',
+    path: 'data/biblia-oso1569.json',
     description: 'Sagradas Escrituras Versión Antigua (1569), edición digital de lectura con ortografía actualizada. Viene incluida dentro de la aplicación y funciona sin conexión.'
   }
 };

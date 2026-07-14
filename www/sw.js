@@ -1,11 +1,11 @@
-const CACHE_NAME = 'biblia-vida-v1.2.1';
+const CACHE_NAME = 'biblia-vida-v1.2.2';
 const APP_SHELL = [
   './',
   './index.html',
   './css/styles.css',
   './js/app.js',
   './data/biblia-rv1909.json',
-  './data/biblia-oso1569-api.json',
+  './data/biblia-oso1569.json',
   './assets/icon-192.png',
   './assets/icon-512.png',
   './manifest.webmanifest'

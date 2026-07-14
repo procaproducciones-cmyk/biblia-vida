@@ -1,0 +1,13 @@
+BIBLIA VIDA v1.2.2 — CORRECCIÓN DEFINITIVA DE LA BIBLIA DEL OSO
+
+1. Descomprime este ZIP.
+2. En GitHub abre el repositorio biblia-vida.
+3. Pulsa Add file > Upload files.
+4. Arrastra TODO lo que está dentro de esta carpeta.
+5. Usa el commit: Corregir carga Biblia del Oso v1.2.2
+6. En Actions espera el visto verde.
+7. Descarga el artefacto Biblia-Vida-APK.
+8. Instala Biblia-Vida-v1.2.2.apk.
+
+CAMBIO CLAVE:
+GitHub Actions descarga el texto, lo convierte al formato interno de Biblia Vida, valida 66 libros, 1,189 capítulos y Génesis 1:1, luego verifica que el archivo quedó físicamente dentro del APK.

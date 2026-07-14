@@ -23,7 +23,7 @@ No necesitas Android Studio ni instalar herramientas Android.
 
 1. Dentro del repositorio nuevo, pulsa **uploading an existing file**.
 2. Descomprime el ZIP de Biblia Vida en tu computadora.
-3. Abre la carpeta `BibliaVida-Android-v1.2.1`.
+3. Abre la carpeta `BibliaVida-Android-v1.2.2`.
 4. Selecciona todo su contenido, incluida la carpeta `.github`.
 5. Arrastra los archivos al área de carga de GitHub.
 6. Espera a que termine la carga.
@@ -48,7 +48,7 @@ El primer proceso debe comenzar automáticamente después de subir los archivos.
 4. Se descargará un ZIP pequeño.
 5. Descomprímelo y encontrarás:
 
-`Biblia-Vida-v1.2.1.apk`
+`Biblia-Vida-v1.2.2.apk`
 
 Ese archivo se puede enviar por WhatsApp, subir a tu página web o instalar en un teléfono Android.
 

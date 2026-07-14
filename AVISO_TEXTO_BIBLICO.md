@@ -1,6 +1,6 @@
 # Aviso sobre los textos bíblicos
 
-Biblia Vida v1.2.1 incluye o permite descargar las siguientes versiones:
+Biblia Vida v1.2.2 incluye o permite descargar las siguientes versiones:
 
 ## Reina-Valera 1909
 
