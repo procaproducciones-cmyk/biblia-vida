@@ -508,3 +508,119 @@ input[type="range"] { width: 100%; height: 4px; margin: 17px 0 8px; accent-color
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+/* ===== Biblia Vida 1.1: selector de versiones ===== */
+.version-select-field { display: block; margin-bottom: 10px; }
+.version-select-field > span,
+.welcome-version-field > span {
+  display: block;
+  margin: 0 0 6px 2px;
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+}
+.version-select-field select,
+.welcome-version-field select {
+  width: 100%;
+  height: 47px;
+  padding: 0 39px 0 13px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 750;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface-2);
+}
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 7px;
+  padding: 5px 9px;
+  color: var(--navy-700);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.2;
+  border: 1px solid rgba(190, 143, 47, .24);
+  border-radius: 999px;
+  background: rgba(219, 173, 76, .12);
+}
+html[data-theme="dark"] .version-badge { color: var(--gold-400); }
+.version-card { overflow: hidden; }
+.version-compact-select { min-width: 132px; }
+.version-info-box {
+  margin-top: 10px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface-2);
+}
+.version-info-box strong { display: block; font-size: 13px; }
+.version-info-box p { margin: 5px 0 0; color: var(--text-soft); font-size: 11px; line-height: 1.5; }
+.saved-version-badge {
+  display: inline-flex;
+  width: fit-content;
+  margin: 7px 0 2px;
+  padding: 4px 8px;
+  color: var(--text-soft);
+  font-size: 9px;
+  font-weight: 850;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.welcome-version-field { display: block; margin: 0 0 15px; text-align: left; }
+.download-modal {
+  position: fixed;
+  z-index: 130;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(3, 13, 24, .84);
+  backdrop-filter: blur(7px);
+}
+.download-card {
+  width: min(410px, 100%);
+  padding: 29px 24px 25px;
+  text-align: center;
+  border-radius: 27px;
+  background: var(--surface);
+  box-shadow: 0 26px 75px rgba(0, 0, 0, .38);
+}
+.download-icon {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 17px;
+  font-size: 37px;
+  border-radius: 23px;
+  background: linear-gradient(145deg, rgba(219,173,76,.20), rgba(11,47,91,.13));
+  border: 1px solid rgba(190,143,47,.22);
+}
+.download-card h2 { margin: 7px 0 10px; font-family: Georgia, serif; font-size: 24px; line-height: 1.2; }
+.download-card p { margin: 0; color: var(--text-soft); font-size: 12px; line-height: 1.55; }
+.download-progress {
+  height: 10px;
+  margin: 22px 0 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.download-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold-500), var(--gold-400));
+  transition: width .35s ease;
+}
+.download-card > strong { color: var(--text-soft); font-size: 11px; }
+
+@media (max-width: 390px) {
+  .version-compact-select { min-width: 116px; max-width: 124px; font-size: 11px; }
+  .download-card { padding-left: 19px; padding-right: 19px; }
+}

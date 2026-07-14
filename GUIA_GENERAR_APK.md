@@ -73,8 +73,8 @@ Después vuelve a compilar desde Android Studio.
 ## Datos actuales
 
 - Nombre: Biblia Vida
-- Versión: 1.0.0
-- Código de versión: 1
+- Versión: 1.2.0
+- Código de versión: 3
 - ID de aplicación: `com.proca.bibliavida`
 - Android mínimo: API 24
 - Android objetivo: API 36

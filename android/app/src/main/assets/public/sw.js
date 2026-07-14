@@ -1,4 +1,4 @@
-const CACHE_NAME = 'biblia-vida-v1.0.0';
+const CACHE_NAME = 'biblia-vida-v1.2.0';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,6 +24,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  if (new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
       const copy = response.clone();

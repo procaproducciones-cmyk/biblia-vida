@@ -10,15 +10,19 @@ Biblia Vida no solicita nombre, correo electrónico, teléfono, contraseña ni c
 
 ## Publicidad y seguimiento
 
-La versión 1.0.0 no contiene anuncios, plataformas publicitarias, herramientas de analítica ni rastreadores de terceros.
+La versión 1.2.0 no contiene anuncios, plataformas publicitarias, herramientas de analítica ni rastreadores integrados.
 
 ## Conexión a Internet
 
-La aplicación contiene el texto bíblico dentro de la instalación y funciona sin conexión. El proyecto Android de la versión 1.0.0 no declara el permiso `android.permission.INTERNET`.
+La **Reina-Valera 1909** viene incluida dentro de la aplicación y funciona sin conexión desde la primera apertura.
+
+La **Biblia del Oso 1569 — Sagradas Escrituras Versión Antigua** es una descarga opcional. Cuando el usuario la selecciona por primera vez, la aplicación se conecta mediante HTTPS a la API pública de GetBible para obtener el texto. La aplicación no envía nombre, correo, notas, favoritos ni progreso de lectura. Como en cualquier conexión web, el proveedor de la API y la infraestructura de red pueden recibir datos técnicos necesarios para atender la solicitud, como la dirección IP y registros básicos de conexión, conforme a sus propias prácticas.
+
+Después de la descarga, la versión se guarda localmente en el dispositivo y puede leerse sin conexión.
 
 ## Datos guardados en el dispositivo
 
-Los favoritos, notas, configuración y última lectura se guardan localmente en el dispositivo del usuario. La aplicación no envía esos datos a servidores externos.
+Los favoritos, notas, configuración, versión seleccionada y última lectura se guardan localmente en el dispositivo del usuario. Biblia Vida no envía esos datos a servidores propios.
 
 ## Eliminación de datos
 

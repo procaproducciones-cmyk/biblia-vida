@@ -8,12 +8,38 @@ const STORAGE = {
   welcomed: 'bv_welcomed'
 };
 
+const BIBLE_DB = { name: 'biblia_vida_textos', version: 1, store: 'versions' };
+const OSO1569_CACHE_KEY = 'oso1569-getbible-sse-v1';
+const LEGACY_OSO1569_CACHE_KEY = 'rv1865-getbible-v1';
+
+const BIBLE_VERSIONS = {
+  rv1909: {
+    id: 'rv1909',
+    shortName: 'RVR 1909',
+    name: 'Reina-Valera 1909',
+    icon: '📘',
+    source: 'local',
+    path: 'data/biblia-rv1909.json',
+    description: 'Versión clásica en español incluida dentro de la aplicación.'
+  },
+  oso1569: {
+    id: 'oso1569',
+    shortName: 'Oso 1569',
+    name: 'Biblia del Oso 1569',
+    icon: '🐻',
+    source: 'download',
+    url: 'https://api.getbible.net/v2/sse.json',
+    description: 'Sagradas Escrituras Versión Antigua (1569), edición digital de lectura con ortografía actualizada. Se descarga una sola vez y queda guardada para lectura sin conexión.'
+  }
+};
+
 const DEFAULT_SETTINGS = {
   theme: 'system',
   fontSize: 19,
   lineHeight: 1.8,
   quickActions: true,
-  keepAwake: false
+  keepAwake: false,
+  bibleVersion: 'rv1909'
 };
 
 const ICONS = {
@@ -53,7 +79,9 @@ const DAILY_REFERENCES = [
 
 const state = {
   bible: null,
+  bibleCache: {},
   books: [],
+  currentVersion: 'rv1909',
   bookIndex: 0,
   chapter: 1,
   screen: 'home',
@@ -62,12 +90,13 @@ const state = {
   settings: loadObject(STORAGE.settings, DEFAULT_SETTINGS),
   favorites: loadObject(STORAGE.favorites, {}),
   notes: loadObject(STORAGE.notes, {}),
-  lastRead: loadObject(STORAGE.lastRead, { bookId: 'gn', chapter: 1 }),
+  lastReads: normalizeLastReads(loadObject(STORAGE.lastRead, { rv1909: { bookId: 'gn', chapter: 1 }, oso1569: { bookId: 'gn', chapter: 1 } })),
   savedTab: 'favorites',
   searchTimer: null,
   searchIndex: null,
   wakeLock: null,
-  toastTimer: null
+  toastTimer: null,
+  versionSwitching: false
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -116,8 +145,52 @@ function normalizeText(text = '') {
     .trim();
 }
 
-function verseKey(bookId, chapter, verse) {
-  return `${bookId}:${chapter}:${verse}`;
+function verseKey(bookId, chapter, verse, versionId = state.currentVersion) {
+  return `${versionId}:${bookId}:${chapter}:${verse}`;
+}
+
+function currentVersionConfig(versionId = state.currentVersion) {
+  return BIBLE_VERSIONS[versionId] || BIBLE_VERSIONS.rv1909;
+}
+
+function normalizeLastReads(value) {
+  if (value?.bookId) {
+    return {
+      rv1909: { ...value },
+      oso1569: { bookId: 'gn', chapter: 1 }
+    };
+  }
+  return {
+    rv1909: { bookId: 'gn', chapter: 1, ...(value?.rv1909 || {}) },
+    oso1569: { bookId: 'gn', chapter: 1, ...(value?.oso1569 || value?.rv1865 || {}) }
+  };
+}
+
+function currentLastRead() {
+  return state.lastReads[state.currentVersion] || { bookId: 'gn', chapter: 1 };
+}
+
+function saveCurrentLastRead(bookId, chapter) {
+  state.lastReads[state.currentVersion] = { bookId, chapter, updatedAt: new Date().toISOString() };
+  saveObject(STORAGE.lastRead, state.lastReads);
+}
+
+function migrateSavedCollections() {
+  const migrate = (collection) => {
+    const migrated = {};
+    Object.values(collection || {}).forEach((item) => {
+      if (!item?.bookId || !item?.chapter || !item?.verse) return;
+      const legacyVersionId = item.versionId === 'rv1865' ? 'oso1569' : item.versionId;
+      const versionId = BIBLE_VERSIONS[legacyVersionId] ? legacyVersionId : 'rv1909';
+      const normalized = { ...item, versionId, versionName: currentVersionConfig(versionId).name };
+      migrated[verseKey(item.bookId, item.chapter, item.verse, versionId)] = normalized;
+    });
+    return migrated;
+  };
+  state.favorites = migrate(state.favorites);
+  state.notes = migrate(state.notes);
+  saveObject(STORAGE.favorites, state.favorites);
+  saveObject(STORAGE.notes, state.notes);
 }
 
 function getBookById(bookId) {
@@ -138,7 +211,9 @@ function getVerse(bookId, chapter, verse) {
     chapter,
     verse,
     text,
-    reference: `${book.name} ${chapter}:${verse}`
+    reference: `${book.name} ${chapter}:${verse}`,
+    versionId: state.currentVersion,
+    versionName: currentVersionConfig().name
   } : null;
 }
 
@@ -235,8 +310,7 @@ function setReaderLocation(bookId, chapter, options = {}) {
   const safeChapter = Math.min(Math.max(Number(chapter) || 1, 1), book.chapters.length);
   state.bookIndex = bookIndex;
   state.chapter = safeChapter;
-  state.lastRead = { bookId: book.id, chapter: safeChapter, updatedAt: new Date().toISOString() };
-  saveObject(STORAGE.lastRead, state.lastRead);
+  saveCurrentLastRead(book.id, safeChapter);
 
   $('#bookSelect').value = book.id;
   populateChapterSelect();
@@ -262,7 +336,7 @@ function renderChapter() {
 
   chapterVerses.forEach((text, index) => {
     const verseNumber = index + 1;
-    const key = verseKey(book.id, state.chapter, verseNumber);
+    const key = verseKey(book.id, state.chapter, verseNumber, state.currentVersion);
     const button = document.createElement('button');
     button.type = 'button';
     button.className = `verse-row${state.favorites[key] ? ' is-favorite' : ''}`;
@@ -314,12 +388,13 @@ function renderDailyVerse() {
 }
 
 function renderRecent() {
-  const book = getBookById(state.lastRead.bookId || 'gn');
-  const chapter = Math.min(Math.max(Number(state.lastRead.chapter) || 1, 1), book.chapters.length);
-  $('#recentReference').textContent = `${book.name} ${chapter}`;
+  const lastRead = currentLastRead();
+  const book = getBookById(lastRead.bookId || 'gn');
+  const chapter = Math.min(Math.max(Number(lastRead.chapter) || 1, 1), book.chapters.length);
+  $('#recentReference').textContent = `${book.name} ${chapter} · ${currentVersionConfig().shortName}`;
   const firstVerse = book.chapters[chapter - 1]?.[0] || '';
   $('#recentProgress').textContent = firstVerse;
-  $('#continueReadingBtn span:last-child').textContent = state.lastRead.updatedAt ? 'Continuar leyendo' : 'Comenzar a leer';
+  $('#continueReadingBtn span:last-child').textContent = lastRead.updatedAt ? 'Continuar leyendo' : 'Comenzar a leer';
 }
 
 function navigateTo(screen) {
@@ -341,7 +416,7 @@ function navigateTo(screen) {
 function openVerseSheet(verse) {
   if (!verse) return;
   state.selectedVerse = verse;
-  const key = verseKey(verse.bookId, verse.chapter, verse.verse);
+  const key = verseKey(verse.bookId, verse.chapter, verse.verse, verse.versionId || state.currentVersion);
   $('#sheetRef').textContent = verse.reference;
   $('#sheetVerseText').textContent = `“${verse.text}”`;
   $('#noteTextarea').value = state.notes[key]?.note || '';
@@ -352,7 +427,7 @@ function openVerseSheet(verse) {
 
 function updateVerseSheetButtons() {
   if (!state.selectedVerse) return;
-  const key = verseKey(state.selectedVerse.bookId, state.selectedVerse.chapter, state.selectedVerse.verse);
+  const key = verseKey(state.selectedVerse.bookId, state.selectedVerse.chapter, state.selectedVerse.verse, state.selectedVerse.versionId || state.currentVersion);
   const favorite = Boolean(state.favorites[key]);
   const hasNote = Boolean(state.notes[key]?.note);
   const favoriteBtn = $('#favoriteVerseBtn');
@@ -383,7 +458,7 @@ function closeSheet(sheet, backdrop) {
 
 function toggleFavorite(verse = state.selectedVerse) {
   if (!verse) return;
-  const key = verseKey(verse.bookId, verse.chapter, verse.verse);
+  const key = verseKey(verse.bookId, verse.chapter, verse.verse, verse.versionId || state.currentVersion);
   if (state.favorites[key]) {
     delete state.favorites[key];
     showToast('Eliminado de favoritos');
@@ -400,7 +475,7 @@ function toggleFavorite(verse = state.selectedVerse) {
 function saveSelectedNote() {
   const verse = state.selectedVerse;
   if (!verse) return;
-  const key = verseKey(verse.bookId, verse.chapter, verse.verse);
+  const key = verseKey(verse.bookId, verse.chapter, verse.verse, verse.versionId || state.currentVersion);
   const note = $('#noteTextarea').value.trim();
   if (note) {
     state.notes[key] = { ...verse, note, updatedAt: new Date().toISOString() };
@@ -418,7 +493,7 @@ function saveSelectedNote() {
 function deleteSelectedNote() {
   const verse = state.selectedVerse;
   if (!verse) return;
-  const key = verseKey(verse.bookId, verse.chapter, verse.verse);
+  const key = verseKey(verse.bookId, verse.chapter, verse.verse, verse.versionId || state.currentVersion);
   delete state.notes[key];
   saveObject(STORAGE.notes, state.notes);
   $('#noteTextarea').value = '';
@@ -429,7 +504,8 @@ function deleteSelectedNote() {
 }
 
 function formatVerseText(verse) {
-  return `“${verse.text}”\n\n${verse.reference} · Reina-Valera 1909\n\nCompartido desde Biblia Vida`;
+  const versionName = verse.versionName || currentVersionConfig(verse.versionId).name;
+  return `“${verse.text}”\n\n${verse.reference} · ${versionName}\n\nCompartido desde Biblia Vida`;
 }
 
 async function copyText(text) {
@@ -640,6 +716,9 @@ function renderSavedList(type) {
     const ref = document.createElement('div');
     ref.className = 'saved-ref';
     ref.textContent = item.reference;
+    const version = document.createElement('span');
+    version.className = 'saved-version-badge';
+    version.textContent = `${currentVersionConfig(item.versionId).icon} ${currentVersionConfig(item.versionId).shortName}`;
     const text = document.createElement('blockquote');
     text.textContent = `“${item.text}”`;
     const menu = document.createElement('button');
@@ -648,7 +727,7 @@ function renderSavedList(type) {
     menu.innerHTML = `<span class="icon">${iconSvg('more-vertical')}</span>`;
     menu.setAttribute('aria-label', `Opciones para ${item.reference}`);
     menu.addEventListener('click', () => openVerseSheet(item));
-    card.append(ref, text, menu);
+    card.append(ref, version, text, menu);
 
     if (type === 'notes' && item.note) {
       const note = document.createElement('p');
@@ -666,8 +745,12 @@ function renderSavedList(type) {
       card.appendChild(time);
     }
 
-    card.addEventListener('click', (event) => {
+    card.addEventListener('click', async (event) => {
       if (event.target.closest('.saved-card-menu')) return;
+      if ((item.versionId || 'rv1909') !== state.currentVersion) {
+        const changed = await switchBible(item.versionId || 'rv1909', { preserveLocation: false });
+        if (!changed) return;
+      }
       setReaderLocation(item.bookId, item.chapter, { smooth: false });
       window.setTimeout(() => {
         const verseButton = $(`.verse-row[data-verse="${item.verse}"]`);
@@ -699,10 +782,13 @@ function resetAllData() {
   if (!confirmed) return;
   state.favorites = {};
   state.notes = {};
-  state.lastRead = { bookId: 'gn', chapter: 1 };
+  state.lastReads = {
+    rv1909: { bookId: 'gn', chapter: 1 },
+    oso1569: { bookId: 'gn', chapter: 1 }
+  };
   saveObject(STORAGE.favorites, state.favorites);
   saveObject(STORAGE.notes, state.notes);
-  saveObject(STORAGE.lastRead, state.lastRead);
+  saveObject(STORAGE.lastRead, state.lastReads);
   renderSaved();
   renderRecent();
   renderChapter();
@@ -713,10 +799,18 @@ function bindEvents() {
   $$('.nav-item').forEach((button) => button.addEventListener('click', () => navigateTo(button.dataset.screenTarget)));
   $$('[data-go]').forEach((button) => button.addEventListener('click', () => navigateTo(button.dataset.go)));
 
-  $('#continueReadingBtn').addEventListener('click', () => setReaderLocation(state.lastRead.bookId || 'gn', state.lastRead.chapter || 1));
-  $('#recentCard').addEventListener('click', () => setReaderLocation(state.lastRead.bookId || 'gn', state.lastRead.chapter || 1));
+  $('#continueReadingBtn').addEventListener('click', () => { const lastRead = currentLastRead(); setReaderLocation(lastRead.bookId || 'gn', lastRead.chapter || 1); });
+  $('#recentCard').addEventListener('click', () => { const lastRead = currentLastRead(); setReaderLocation(lastRead.bookId || 'gn', lastRead.chapter || 1); });
   $('#shareDailyBtn').addEventListener('click', () => shareVerse(state.dailyVerse));
   $('#themeQuickBtn').addEventListener('click', toggleTheme);
+
+  const handleVersionChange = async (event) => {
+    const requested = event.target.value;
+    const changed = await switchBible(requested, { preserveLocation: true });
+    if (!changed) syncVersionSelects();
+  };
+  $('#readerVersionSelect').addEventListener('change', handleVersionChange);
+  $('#versionSelect').addEventListener('change', handleVersionChange);
 
   $('#bookSelect').addEventListener('change', (event) => setReaderLocation(event.target.value, 1, { navigate: false }));
   $('#chapterSelect').addEventListener('change', (event) => setReaderLocation(state.books[state.bookIndex].id, Number(event.target.value), { navigate: false }));
@@ -797,9 +891,11 @@ function bindEvents() {
   });
   $('#resetDataBtn').addEventListener('click', resetAllData);
 
-  $('#welcomeStartBtn').addEventListener('click', () => {
+  $('#welcomeStartBtn').addEventListener('click', async () => {
     localStorage.setItem(STORAGE.welcomed, '1');
     $('#welcomeModal').classList.add('hidden');
+    const requested = $('#welcomeVersionSelect').value;
+    if (requested !== state.currentVersion) await switchBible(requested, { preserveLocation: false });
   });
 
   document.addEventListener('visibilitychange', updateWakeLock);
@@ -814,13 +910,308 @@ function bindEvents() {
   });
 }
 
-async function loadBible() {
-  const response = await fetch('data/biblia-rv1909.json', { cache: 'force-cache' });
-  if (!response.ok) throw new Error(`No se pudo cargar la Biblia (${response.status})`);
-  const bible = await response.json();
-  if (!Array.isArray(bible.books) || bible.books.length !== 66) throw new Error('El archivo bíblico no es válido');
-  state.bible = bible;
-  state.books = bible.books;
+function openBibleDb() {
+  return new Promise((resolve, reject) => {
+    if (!('indexedDB' in window)) {
+      reject(new Error('Este dispositivo no permite guardar la versión descargada.'));
+      return;
+    }
+    const request = indexedDB.open(BIBLE_DB.name, BIBLE_DB.version);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(BIBLE_DB.store)) db.createObjectStore(BIBLE_DB.store);
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('No se pudo abrir el almacenamiento local.'));
+  });
+}
+
+async function bibleDbGet(key) {
+  const db = await openBibleDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(BIBLE_DB.store, 'readonly');
+    const request = tx.objectStore(BIBLE_DB.store).get(key);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+    tx.oncomplete = () => db.close();
+  });
+}
+
+async function bibleDbPut(key, value) {
+  const db = await openBibleDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(BIBLE_DB.store, 'readwrite');
+    tx.objectStore(BIBLE_DB.store).put(value, key);
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onerror = () => { db.close(); reject(tx.error); };
+  });
+}
+
+function setDownloadProgress(percent, message) {
+  const safe = Math.min(100, Math.max(0, Number(percent) || 0));
+  $('#downloadProgressBar').style.width = `${safe}%`;
+  $('.download-progress').setAttribute('aria-valuenow', String(Math.round(safe)));
+  $('#downloadProgressText').textContent = `${Math.round(safe)}%`;
+  if (message) $('#downloadMessage').textContent = message;
+}
+
+function showDownloadModal() {
+  const modal = $('#versionDownloadModal');
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+  setDownloadProgress(8, 'La descarga se realiza una sola vez. Después podrás leer esta versión sin conexión.');
+}
+
+function hideDownloadModal() {
+  const modal = $('#versionDownloadModal');
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+async function fetchJson(url, timeoutMs = 90000) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+    if (!response.ok) throw new Error(`El servidor respondió ${response.status}`);
+    return await response.json();
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
+function collectChapterNodes(value, output, seen = new WeakSet(), context = {}) {
+  if (!value || typeof value !== 'object') return;
+  if (seen.has(value)) return;
+  seen.add(value);
+
+  const bookNr = Number(value.book_nr || value.book_number || context.bookNr || 0);
+  const bookName = value.book_name || value.book || context.bookName || '';
+  const verses = value.verses;
+
+  if (value.chapter && verses && typeof verses === 'object' && bookNr) {
+    output.push({ ...value, book_nr: bookNr, book_name: value.book_name || bookName });
+    return;
+  }
+
+  const nextContext = { bookNr, bookName };
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectChapterNodes(item, output, seen, nextContext));
+  } else {
+    Object.entries(value).forEach(([key, item]) => {
+      let childContext = nextContext;
+      if (!bookNr && /^\d+$/.test(key) && item && typeof item === 'object' && (item.chapters || item.book_nr || item.book_name)) {
+        childContext = { bookNr: Number(key), bookName: item.book_name || item.name || '' };
+      }
+      collectChapterNodes(item, output, seen, childContext);
+    });
+  }
+}
+
+function orderedValues(value, numberKey) {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== 'object') return [];
+  return Object.values(value).sort((a, b) => Number(a?.[numberKey] || 0) - Number(b?.[numberKey] || 0));
+}
+
+function normalizeGetBibleTranslation(payload) {
+  const nodes = [];
+  collectChapterNodes(payload, nodes);
+  if (nodes.length < 1100) throw new Error('La descarga bíblica llegó incompleta.');
+
+  const baseBooks = state.bibleCache.rv1909?.books || [];
+  const grouped = new Map();
+  nodes.forEach((node) => {
+    const bookNumber = Number(node.book_nr);
+    const chapterNumber = Number(node.chapter);
+    if (!bookNumber || !chapterNumber) return;
+    if (!grouped.has(bookNumber)) grouped.set(bookNumber, new Map());
+    const verseItems = orderedValues(node.verses, 'verse');
+    const texts = verseItems.map((item) => String(item?.text || '').trim());
+    if (texts.length) grouped.get(bookNumber).set(chapterNumber, { name: node.book_name, texts });
+  });
+
+  const books = baseBooks.map((baseBook, index) => {
+    const chapterMap = grouped.get(index + 1);
+    if (!chapterMap) throw new Error(`Falta el libro ${baseBook.name} en la descarga.`);
+    const chapterNumbers = [...chapterMap.keys()].sort((a, b) => a - b);
+    return {
+      id: baseBook.id,
+      name: chapterMap.get(chapterNumbers[0])?.name || baseBook.name,
+      testament: baseBook.testament,
+      chapters: chapterNumbers.map((chapterNumber) => chapterMap.get(chapterNumber).texts)
+    };
+  });
+
+  if (books.length !== 66) throw new Error('La versión descargada no contiene los 66 libros esperados.');
+  return {
+    metadata: {
+      name: 'Biblia del Oso 1569',
+      abbreviation: 'Oso 1569',
+      source: 'GetBible API v2',
+      sourceCatalogName: 'Sagradas Escrituras (1569)',
+      sourceDescription: 'Sagradas Escrituras Versión Antigua (1569), edición digital con ortografía actualizada',
+      editorialNotice: 'La ficha técnica del módulo sse describe su base digital como Reina-Valera 1865 con arreglos ortográficos; no es un facsímil ni una transcripción letra por letra de la impresión de 1569.',
+      sourceLicense: 'Public Domain',
+      sourceUrl: 'https://api.getbible.net/v2/sse.json',
+      downloadedAt: new Date().toISOString(),
+      books: 66
+    },
+    books
+  };
+}
+
+async function downloadOso1569Bible() {
+  showDownloadModal();
+  try {
+    setDownloadProgress(18, 'Conectando con la fuente bíblica verificada…');
+    const payload = await fetchJson(BIBLE_VERSIONS.oso1569.url);
+    setDownloadProgress(72, 'Organizando los 66 libros para la lectura sin conexión…');
+    await new Promise((resolve) => window.setTimeout(resolve, 60));
+    const bible = normalizeGetBibleTranslation(payload);
+    setDownloadProgress(88, 'Guardando la Biblia dentro de este dispositivo…');
+    await bibleDbPut(OSO1569_CACHE_KEY, bible);
+    setDownloadProgress(100, '¡Lista! La Biblia del Oso 1569 ya está disponible sin conexión.');
+    await new Promise((resolve) => window.setTimeout(resolve, 500));
+    return bible;
+  } finally {
+    hideDownloadModal();
+  }
+}
+
+async function isOso1569Installed() {
+  if (state.bibleCache.oso1569) return true;
+  try { return Boolean(await bibleDbGet(OSO1569_CACHE_KEY)); } catch (_) { return false; }
+}
+
+async function loadBibleVersion(versionId, options = {}) {
+  if (state.bibleCache[versionId]) return state.bibleCache[versionId];
+  const config = currentVersionConfig(versionId);
+
+  if (config.source === 'local') {
+    const response = await fetch(config.path, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`No se pudo cargar la Biblia (${response.status})`);
+    const bible = await response.json();
+    if (!Array.isArray(bible.books) || bible.books.length !== 66) throw new Error('El archivo bíblico no es válido');
+    state.bibleCache[versionId] = bible;
+    return bible;
+  }
+
+  try {
+    let cached = await bibleDbGet(OSO1569_CACHE_KEY);
+    if (!cached) {
+      const legacyCached = await bibleDbGet(LEGACY_OSO1569_CACHE_KEY);
+      if (legacyCached?.books?.length === 66) {
+        cached = {
+          ...legacyCached,
+          metadata: {
+            ...(legacyCached.metadata || {}),
+            name: 'Biblia del Oso 1569',
+            abbreviation: 'Oso 1569',
+            sourceCatalogName: 'Sagradas Escrituras (1569)',
+            editorialNotice: 'Edición digital con ortografía actualizada; no es un facsímil ni una transcripción letra por letra de la impresión de 1569.'
+          }
+        };
+        await bibleDbPut(OSO1569_CACHE_KEY, cached);
+      }
+    }
+    if (cached?.books?.length === 66) {
+      state.bibleCache[versionId] = cached;
+      return cached;
+    }
+  } catch (error) {
+    console.warn('No se pudo leer la Biblia descargada:', error);
+  }
+
+  if (options.allowDownload === false) return null;
+  const bible = await downloadOso1569Bible();
+  state.bibleCache[versionId] = bible;
+  return bible;
+}
+
+function syncVersionSelects() {
+  ['#readerVersionSelect', '#versionSelect', '#welcomeVersionSelect'].forEach((selector) => {
+    const select = $(selector);
+    if (select) select.value = state.currentVersion;
+  });
+}
+
+async function updateVersionUi() {
+  const config = currentVersionConfig();
+  $('#brandVersion').textContent = config.name;
+  $('#readerVersionBadge').textContent = `${config.icon} ${config.name}`;
+  $('#searchVersionLabel').textContent = config.name;
+  $('#homeVersionSummary').textContent = config.name;
+  $('#versionInfoTitle').textContent = `${config.icon} ${config.name}`;
+  $('#versionInfoDescription').textContent = config.description;
+  const installed = state.currentVersion === 'rv1909' || await isOso1569Installed();
+  $('#versionStatusText').textContent = state.currentVersion === 'rv1909'
+    ? 'Esta versión viene instalada dentro de la aplicación.'
+    : installed
+      ? 'Descargada y disponible sin conexión en este dispositivo.'
+      : 'Se descargará una sola vez y quedará disponible sin conexión.';
+  syncVersionSelects();
+}
+
+async function switchBible(versionId, options = {}) {
+  if (!BIBLE_VERSIONS[versionId] || state.versionSwitching) return false;
+  if (versionId === state.currentVersion && state.books.length) {
+    syncVersionSelects();
+    return true;
+  }
+
+  const previousVersion = state.currentVersion;
+  const previousBible = state.bible;
+  const previousBooks = state.books;
+  const previousBookIndex = state.bookIndex;
+  const previousBookId = state.books[state.bookIndex]?.id || currentLastRead().bookId || 'gn';
+  const previousChapter = state.chapter || 1;
+  state.versionSwitching = true;
+  try {
+    const bible = await loadBibleVersion(versionId, { allowDownload: true });
+    if (!bible) return false;
+    state.currentVersion = versionId;
+    state.settings.bibleVersion = versionId;
+    state.bible = bible;
+    state.books = bible.books;
+    state.searchIndex = null;
+    saveObject(STORAGE.settings, state.settings);
+
+    const target = options.preserveLocation === false
+      ? (state.lastReads[versionId] || { bookId: 'gn', chapter: 1 })
+      : { bookId: previousBookId, chapter: previousChapter };
+    const book = getBookById(target.bookId || 'gn');
+    state.bookIndex = getBookIndex(book.id);
+    state.chapter = Math.min(Math.max(Number(target.chapter) || 1, 1), book.chapters.length);
+    saveCurrentLastRead(book.id, state.chapter);
+
+    populateBookSelect();
+    $('#bookSelect').value = book.id;
+    populateChapterSelect();
+    renderChapter();
+    renderDailyVerse();
+    renderRecent();
+    renderSavedCounts();
+    performSearch($('#searchInput').value || '');
+    await updateVersionUi();
+    showToast(`${currentVersionConfig().name} activada`);
+    return true;
+  } catch (error) {
+    console.error(error);
+    state.currentVersion = previousVersion;
+    state.bible = previousBible;
+    state.books = previousBooks;
+    state.bookIndex = previousBookIndex;
+    state.chapter = previousChapter;
+    syncVersionSelects();
+    const message = navigator.onLine
+      ? 'No se pudo descargar la Biblia del Oso 1569. Revisa la conexión e inténtalo nuevamente.'
+      : 'Conéctate a internet una vez para descargar la Biblia del Oso 1569.';
+    window.alert(message);
+    return false;
+  } finally {
+    state.versionSwitching = false;
+  }
 }
 
 function showLoadError(error) {
@@ -835,25 +1226,43 @@ function showLoadError(error) {
 
 async function init() {
   hydrateIcons();
+  migrateSavedCollections();
   bindEvents();
   applySettings();
 
   try {
-    await loadBible();
+    const rvBible = await loadBibleVersion('rv1909');
+    state.bibleCache.rv1909 = rvBible;
+    if (state.settings.bibleVersion === 'rv1865') state.settings.bibleVersion = 'oso1569';
+    const requestedVersion = BIBLE_VERSIONS[state.settings.bibleVersion] ? state.settings.bibleVersion : 'rv1909';
+    let initialBible = rvBible;
+    if (requestedVersion === 'oso1569') {
+      initialBible = await loadBibleVersion('oso1569', { allowDownload: false }) || rvBible;
+      state.currentVersion = initialBible === rvBible ? 'rv1909' : 'oso1569';
+      if (state.currentVersion !== requestedVersion) state.settings.bibleVersion = 'rv1909';
+    } else {
+      state.currentVersion = 'rv1909';
+    }
+
+    state.bible = initialBible;
+    state.books = initialBible.books;
+    const lastRead = currentLastRead();
     populateBookSelect();
-    const initialBook = getBookById(state.lastRead.bookId || 'gn');
+    const initialBook = getBookById(lastRead.bookId || 'gn');
     state.bookIndex = getBookIndex(initialBook.id);
-    state.chapter = Math.min(Math.max(Number(state.lastRead.chapter) || 1, 1), initialBook.chapters.length);
+    state.chapter = Math.min(Math.max(Number(lastRead.chapter) || 1, 1), initialBook.chapters.length);
     $('#bookSelect').value = initialBook.id;
     populateChapterSelect();
     renderChapter();
     renderDailyVerse();
     renderRecent();
     renderSavedCounts();
+    await updateVersionUi();
     $('#app').setAttribute('aria-busy', 'false');
 
     window.setTimeout(() => $('#loadingScreen').classList.add('is-hidden'), 450);
     if (!localStorage.getItem(STORAGE.welcomed)) {
+      $('#welcomeVersionSelect').value = state.currentVersion;
       window.setTimeout(() => $('#welcomeModal').classList.remove('hidden'), 800);
     }
 

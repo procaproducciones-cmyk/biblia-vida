@@ -1,14 +1,24 @@
 {
-  "name": "Biblia Vida - Reina-Valera 1909",
+  "name": "Biblia Vida - Versiones bíblicas históricas",
   "short_name": "Biblia Vida",
-  "description": "Santa Biblia Reina-Valera 1909, sin conexión y sin publicidad.",
+  "description": "Reina-Valera 1909 y Biblia del Oso 1569, sin publicidad y con lectura sin conexión.",
   "lang": "es",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#071b34",
   "theme_color": "#0b2f5b",
   "icons": [
-    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

@@ -1,18 +1,29 @@
-BIBLIA VIDA v1.0.0
+BIBLIA VIDA v1.2.0
 ==================
 
-Estado: Proyecto Android completo y listo para compilar.
+Estado: Proyecto Android actualizado y listo para compilar.
 
-Pruebas superadas:
-- Carga de 66 libros.
-- Lectura de Génesis 1.
-- Navegación a Juan 3 y verificación de Juan 3:16.
-- Guardado de favoritos.
-- Búsqueda exacta de "Jehová es mi pastor" con resultado Salmos 23:1.
-- Sin errores JavaScript detectados durante las pruebas.
+Cambios integrados:
+- Selector entre Reina-Valera 1909 y Biblia del Oso 1569.
+- RVR 1909 incluida localmente.
+- Biblia del Oso 1569 (Sagradas Escrituras Versión Antigua, ortografía actualizada) descargable una vez desde GetBible API v2 y guardada en IndexedDB.
+- Favoritos, notas, búsqueda y última lectura compatibles con ambas versiones.
+- Cambio de versión conservando libro y capítulo.
+- Migración desde el identificador provisional rv1865 de v1.1.0.
+- Permiso INTERNET usado exclusivamente para la descarga opcional.
+- versionCode 3 / versionName 1.2.0.
+
+Comprobaciones realizadas:
+- Archivo RVR 1909 válido: 66 libros, 1,189 capítulos y 31,102 versículos.
+- Sintaxis JavaScript válida.
+- HTML sin identificadores duplicados.
+- Manifiesto Android con permiso INTERNET.
 - Proyecto Capacitor sincronizado con Android.
-- Manifiesto Android sin permiso INTERNET.
 
-Para obtener la APK:
+Aclaración editorial:
+La versión visible como “Biblia del Oso 1569” corresponde al módulo digital sse, catalogado como “Sagradas Escrituras (1569)” y usado con ortografía actualizada. No se presenta como facsímil ni transcripción letra por letra de la impresión original. La propia ficha técnica del módulo describe su base digital como Reina-Valera 1865 con arreglos ortográficos; esta nota queda visible dentro de la aplicación y en AVISO_TEXTO_BIBLICO.md.
+
+Para obtener otra APK:
 - Ejecutar ABRIR_EN_ANDROID_STUDIO.bat, o
-- seguir GUIA_GENERAR_APK.md.
+- seguir GUIA_GENERAR_APK.md, o
+- usar el flujo de GitHub Actions incluido.

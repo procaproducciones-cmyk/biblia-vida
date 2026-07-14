@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b2f5b" />
-  <meta name="description" content="Biblia Vida - Reina-Valera 1909, sin conexión y sin publicidad." />
+  <meta name="description" content="Biblia Vida - Reina-Valera 1909 y Biblia del Oso 1569, sin publicidad." />
   <title>Biblia Vida</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/icon-192.png" />
@@ -33,7 +33,7 @@
         </div>
         <div>
           <h1>Biblia Vida</h1>
-          <p>Reina-Valera 1909</p>
+          <p id="brandVersion">Reina-Valera 1909</p>
         </div>
       </div>
       <button id="themeQuickBtn" class="icon-btn" type="button" aria-label="Cambiar tema" title="Cambiar tema">
@@ -45,9 +45,9 @@
       <section id="screen-home" class="screen active" data-screen="home" aria-labelledby="homeTitle">
         <div class="home-hero">
           <div class="hero-shine" aria-hidden="true"></div>
-          <div class="hero-kicker"><span class="status-dot"></span> Disponible sin conexión</div>
+          <div class="hero-kicker"><span class="status-dot"></span> Lectura sin conexión</div>
           <h2 id="homeTitle">La Palabra de Dios, siempre contigo</h2>
-          <p>Lee, busca, guarda y comparte la Biblia sin anuncios ni registros.</p>
+          <p>Elige entre la Reina-Valera 1909 y la Biblia del Oso 1569 con ortografía actualizada. Lee, busca, guarda y comparte sin anuncios ni registros.</p>
           <button id="continueReadingBtn" class="btn btn-gold" type="button">
             <span class="icon" data-icon="book-open"></span>
             <span>Comenzar a leer</span>
@@ -71,7 +71,7 @@
         <div class="quick-grid" aria-label="Accesos rápidos">
           <button class="quick-card" type="button" data-go="reader">
             <span class="quick-icon"><span class="icon" data-icon="book-open"></span></span>
-            <span><strong>Leer Biblia</strong><small>66 libros completos</small></span>
+            <span><strong>Leer Biblia</strong><small id="homeVersionSummary">Reina-Valera 1909</small></span>
           </button>
           <button class="quick-card" type="button" data-go="search">
             <span class="quick-icon"><span class="icon" data-icon="search"></span></span>
@@ -107,6 +107,13 @@
 
       <section id="screen-reader" class="screen" data-screen="reader" aria-labelledby="readerTitle">
         <div class="reader-toolbar sticky-card">
+          <label class="version-select-field">
+            <span>Versión bíblica</span>
+            <select id="readerVersionSelect" aria-label="Seleccionar versión bíblica">
+              <option value="rv1909">📘 Reina-Valera 1909</option>
+              <option value="oso1569">🐻 Biblia del Oso 1569</option>
+            </select>
+          </label>
           <div class="select-row">
             <label class="select-field">
               <span>Libro</span>
@@ -122,6 +129,7 @@
         <div class="reader-heading">
           <div>
             <span id="readerTestament" class="eyebrow">Antiguo Testamento</span>
+            <span id="readerVersionBadge" class="version-badge">Reina-Valera 1909</span>
             <h2 id="readerTitle">Génesis 1</h2>
           </div>
           <button id="readerMoreBtn" class="icon-btn soft" type="button" aria-label="Opciones de lectura">
@@ -147,7 +155,7 @@
         <div class="screen-intro">
           <span class="eyebrow">Encuentra un pasaje</span>
           <h2 id="searchTitle">Buscar en la Biblia</h2>
-          <p>Escribe una palabra o una frase. La búsqueda se realiza dentro de tu teléfono.</p>
+          <p>Escribe una palabra o una frase. La búsqueda se realiza en <strong id="searchVersionLabel">Reina-Valera 1909</strong> dentro de tu teléfono.</p>
         </div>
 
         <div class="search-box sticky-card">
@@ -195,6 +203,21 @@
           <p>Ajusta la apariencia de la Biblia para leer con mayor comodidad.</p>
         </div>
 
+        <div class="settings-card version-card">
+          <h3>Versión bíblica</h3>
+          <label class="setting-row no-border">
+            <span class="setting-copy"><strong>Versión para leer</strong><small id="versionStatusText">La Reina-Valera 1909 está instalada.</small></span>
+            <select id="versionSelect" class="compact-select version-compact-select" aria-label="Versión bíblica activa">
+              <option value="rv1909">📘 RVR 1909</option>
+              <option value="oso1569">🐻 Oso 1569</option>
+            </select>
+          </label>
+          <div class="version-info-box">
+            <strong id="versionInfoTitle">Reina-Valera 1909</strong>
+            <p id="versionInfoDescription">Versión clásica en español incluida dentro de la aplicación.</p>
+          </div>
+        </div>
+
         <div class="settings-card">
           <h3>Apariencia</h3>
           <label class="setting-row">
@@ -235,16 +258,18 @@
             <div class="brand-mark large" aria-hidden="true">
               <svg viewBox="0 0 48 48"><path d="M7 10.5c6.4-2.2 11.9-.9 17 3.4v25c-5.1-4.3-10.6-5.6-17-3.4v-25Z"/><path d="M41 10.5c-6.4-2.2-11.9-.9-17 3.4v25c5.1-4.3 10.6-5.6 17-3.4v-25Z"/><path d="M11 16.5c3.8-.8 7.1.1 10 2.3M37 16.5c-3.8-.8-7.1.1-10 2.3"/></svg>
             </div>
-            <div><h3>Biblia Vida</h3><p>Versión 1.0.0</p></div>
+            <div><h3>Biblia Vida</h3><p>Versión 1.2.0</p></div>
           </div>
           <ul class="about-list">
             <li><span class="icon" data-icon="shield"></span><span><strong>Sin publicidad</strong><small>No contiene anuncios ni rastreadores.</small></span></li>
-            <li><span class="icon" data-icon="wifi-off"></span><span><strong>100% sin conexión</strong><small>La Biblia completa vive dentro de la aplicación.</small></span></li>
+            <li><span class="icon" data-icon="wifi-off"></span><span><strong>Lectura sin conexión</strong><small>La RVR 1909 viene instalada; la Biblia del Oso 1569 se descarga una sola vez y queda guardada.</small></span></li>
             <li><span class="icon" data-icon="lock"></span><span><strong>Privacidad</strong><small>No requiere cuenta ni recopila datos personales.</small></span></li>
           </ul>
           <div class="source-notice">
             <strong>Texto bíblico</strong>
-            <p>Reina-Valera 1909 · Dominio público. 66 libros, 1,189 capítulos y 31,102 versículos.</p>
+            <p><strong>Reina-Valera 1909:</strong> texto histórico de dominio público, incluido localmente.</p>
+            <p><strong>Biblia del Oso 1569:</strong> edición digital conocida como “Sagradas Escrituras Versión Antigua (1569)”, con ortografía actualizada. El módulo se obtiene mediante GetBible y figura como dominio público.</p>
+            <p><em>Nota editorial:</em> no es un facsímil ni una transcripción letra por letra de la impresión de 1569. La ficha técnica del módulo <code>sse</code> indica que su base digital corresponde a una Reina-Valera 1865 con arreglos ortográficos.</p>
           </div>
           <p class="made-by">Un proyecto de <strong>Proca Corporación</strong></p>
         </div>
@@ -339,13 +364,34 @@
       </div>
       <span class="eyebrow">Bienvenido</span>
       <h2 id="welcomeTitle">La Palabra, sin distracciones</h2>
-      <p>Biblia Vida funciona sin internet, no tiene publicidad y no necesita registro.</p>
+      <p>La Reina-Valera 1909 viene instalada. También puedes elegir la Biblia del Oso 1569 con ortografía actualizada, que se descarga una sola vez para leerla después sin conexión.</p>
       <div class="welcome-benefits">
         <span><span class="icon" data-icon="wifi-off"></span> Sin conexión</span>
         <span><span class="icon" data-icon="shield"></span> Sin anuncios</span>
         <span><span class="icon" data-icon="lock"></span> Privada</span>
       </div>
+      <label class="welcome-version-field">
+        <span>Elige tu versión bíblica</span>
+        <select id="welcomeVersionSelect" aria-label="Versión bíblica inicial">
+          <option value="rv1909">📘 Reina-Valera 1909</option>
+          <option value="oso1569">🐻 Biblia del Oso 1569</option>
+        </select>
+      </label>
       <button id="welcomeStartBtn" class="btn btn-gold full-width" type="button">Comenzar</button>
+    </div>
+  </div>
+
+
+  <div id="versionDownloadModal" class="download-modal hidden" role="dialog" aria-modal="true" aria-labelledby="downloadTitle" aria-hidden="true">
+    <div class="download-card">
+      <div class="download-icon" aria-hidden="true">🐻</div>
+      <span class="eyebrow">Preparando versión bíblica</span>
+      <h2 id="downloadTitle">Descargando Biblia del Oso 1569</h2>
+      <p id="downloadMessage">La descarga se realiza una sola vez. Después podrás leer esta versión sin conexión.</p>
+      <div class="download-progress" role="progressbar" aria-label="Progreso de descarga" aria-valuemin="0" aria-valuemax="100" aria-valuenow="8">
+        <span id="downloadProgressBar" style="width:8%"></span>
+      </div>
+      <strong id="downloadProgressText">Conectando…</strong>
     </div>
   </div>
 

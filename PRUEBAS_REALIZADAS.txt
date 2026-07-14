@@ -1,0 +1,34 @@
+BIBLIA VIDA v1.2.0 — PRUEBAS REALIZADAS
+=========================================
+Fecha: 13 de julio de 2026
+
+RESULTADOS CORRECTOS
+--------------------
+[OK] Sintaxis de www/js/app.js validada con Node.js.
+[OK] Reina-Valera 1909 verificada: 66 libros, 1,189 capítulos y 31,102 versículos.
+[OK] HTML validado sin identificadores duplicados y con los controles de versión requeridos.
+[OK] package.json en versión 1.2.0.
+[OK] Android versionCode 3 y versionName 1.2.0.
+[OK] Permiso android.permission.INTERNET agregado.
+[OK] Archivos web copiados y sincronizados con android/app/src/main/assets/public.
+[OK] Etiquetado de la segunda versión corregido a “Biblia del Oso 1569”.
+[OK] CSS con llaves balanceadas.
+[OK] Normalizador de la respuesta GetBible probado con una estructura completa de 66 libros, 1,189 capítulos y 31,102 versículos.
+[OK] npm ci completado sin vulnerabilidades reportadas.
+[OK] npx cap sync android completado correctamente.
+
+COMPILACIÓN APK
+---------------
+La compilación local no pudo completarse porque Gradle intentó descargar la distribución 8.14.3 y el entorno de ejecución no tenía resolución DNS hacia services.gradle.org.
+
+Esto no es un error del proyecto. El archivo .github/workflows/generar-apk.yml quedó actualizado para generar Biblia-Vida-v1.2.0.apk mediante GitHub Actions, y las guías incluidas explican el proceso.
+
+PRUEBA RECOMENDADA EN TELÉFONO
+------------------------------
+1. Instalar la APK generada.
+2. Abrir la RVR 1909 y comprobar Juan 3:16.
+3. Con Internet, elegir “Biblia del Oso 1569”.
+4. Esperar la descarga inicial.
+5. Cerrar la aplicación, desactivar Internet y comprobar que la Oso 1569 sigue disponible.
+6. Crear un favorito y una nota en cada versión.
+7. Cambiar de versión en el mismo libro y capítulo.
