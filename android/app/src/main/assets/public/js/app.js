@@ -27,9 +27,9 @@ const BIBLE_VERSIONS = {
     shortName: 'Oso 1569',
     name: 'Biblia del Oso 1569',
     icon: '🐻',
-    source: 'download',
-    url: 'https://api.getbible.net/v2/sse.json',
-    description: 'Sagradas Escrituras Versión Antigua (1569), edición digital de lectura con ortografía actualizada. Se descarga una sola vez y queda guardada para lectura sin conexión.'
+    source: 'bundled',
+    path: 'data/biblia-oso1569-api.json',
+    description: 'Sagradas Escrituras Versión Antigua (1569), edición digital de lectura con ortografía actualizada. Viene incluida dentro de la aplicación y funciona sin conexión.'
   }
 };
 
@@ -1097,6 +1097,15 @@ async function loadBibleVersion(versionId, options = {}) {
     return bible;
   }
 
+  if (config.source === 'bundled') {
+    const response = await fetch(config.path, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`No se pudo abrir la Biblia del Oso (${response.status})`);
+    const payload = await response.json();
+    const bible = normalizeGetBibleTranslation(payload);
+    state.bibleCache[versionId] = bible;
+    return bible;
+  }
+
   try {
     let cached = await bibleDbGet(OSO1569_CACHE_KEY);
     if (!cached) {
@@ -1144,12 +1153,7 @@ async function updateVersionUi() {
   $('#homeVersionSummary').textContent = config.name;
   $('#versionInfoTitle').textContent = `${config.icon} ${config.name}`;
   $('#versionInfoDescription').textContent = config.description;
-  const installed = state.currentVersion === 'rv1909' || await isOso1569Installed();
-  $('#versionStatusText').textContent = state.currentVersion === 'rv1909'
-    ? 'Esta versión viene instalada dentro de la aplicación.'
-    : installed
-      ? 'Descargada y disponible sin conexión en este dispositivo.'
-      : 'Se descargará una sola vez y quedará disponible sin conexión.';
+  $('#versionStatusText').textContent = 'Esta versión viene instalada dentro de la aplicación y está disponible sin conexión.';
   syncVersionSelects();
 }
 
@@ -1168,7 +1172,7 @@ async function switchBible(versionId, options = {}) {
   const previousChapter = state.chapter || 1;
   state.versionSwitching = true;
   try {
-    const bible = await loadBibleVersion(versionId, { allowDownload: true });
+    const bible = await loadBibleVersion(versionId);
     if (!bible) return false;
     state.currentVersion = versionId;
     state.settings.bibleVersion = versionId;
@@ -1204,10 +1208,7 @@ async function switchBible(versionId, options = {}) {
     state.bookIndex = previousBookIndex;
     state.chapter = previousChapter;
     syncVersionSelects();
-    const message = navigator.onLine
-      ? 'No se pudo descargar la Biblia del Oso 1569. Revisa la conexión e inténtalo nuevamente.'
-      : 'Conéctate a internet una vez para descargar la Biblia del Oso 1569.';
-    window.alert(message);
+    window.alert('No se pudo abrir la Biblia del Oso 1569 incluida en la aplicación. Cierra y vuelve a abrir la app.');
     return false;
   } finally {
     state.versionSwitching = false;
@@ -1237,7 +1238,7 @@ async function init() {
     const requestedVersion = BIBLE_VERSIONS[state.settings.bibleVersion] ? state.settings.bibleVersion : 'rv1909';
     let initialBible = rvBible;
     if (requestedVersion === 'oso1569') {
-      initialBible = await loadBibleVersion('oso1569', { allowDownload: false }) || rvBible;
+      initialBible = await loadBibleVersion('oso1569') || rvBible;
       state.currentVersion = initialBible === rvBible ? 'rv1909' : 'oso1569';
       if (state.currentVersion !== requestedVersion) state.settings.bibleVersion = 'rv1909';
     } else {

@@ -10,7 +10,7 @@ Biblia Vida no solicita nombre, correo electrónico, teléfono, contraseña ni c
 
 ## Publicidad y seguimiento
 
-La versión 1.2.0 no contiene anuncios, plataformas publicitarias, herramientas de analítica ni rastreadores integrados.
+La versión 1.2.1 no contiene anuncios, plataformas publicitarias, herramientas de analítica ni rastreadores integrados.
 
 ## Conexión a Internet
 

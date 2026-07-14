@@ -1,10 +1,10 @@
-# 📖 Biblia Vida v1.2.0
+# 📖 Biblia Vida v1.2.1
 
 Aplicación Android con **Reina-Valera 1909** incluida y **Biblia del Oso 1569 — Sagradas Escrituras Versión Antigua** disponible mediante una descarga opcional de una sola vez. La edición digital usa **ortografía actualizada**; después de descargarla puede leerse **sin conexión**, **sin publicidad**, **sin cuentas** y sin enviar favoritos o notas a servidores.
 
 Proyecto desarrollado para **Proca Corporación**.
 
-## Novedad principal de la versión 1.2.0
+## Novedad principal de la versión 1.2.1
 
 - La segunda versión ahora se presenta al usuario como **Biblia del Oso 1569**.
 - Selector de versión en la bienvenida, el lector y los ajustes.
@@ -45,7 +45,7 @@ Proyecto desarrollado para **Proca Corporación**.
 ## Carpetas principales
 
 ```text
-BibliaVida-Android-v1.2.0/
+BibliaVida-Android-v1.2.1/
 ├── www/                    # Aplicación web móvil y texto RVR 1909
 ├── android/                # Proyecto nativo Android
 ├── resources/              # Icono y pantalla de inicio
@@ -56,7 +56,7 @@ BibliaVida-Android-v1.2.0/
 
 ## Abrir el proyecto
 
-Consulta **GUIA_GENERAR_APK.md**. El proyecto conserva el identificador `com.proca.bibliavida`, usa la versión `1.2.0` y el código de versión Android `3`.
+Consulta **GUIA_GENERAR_APK.md**. El proyecto conserva el identificador `com.proca.bibliavida`, usa la versión `1.2.1` y el código de versión Android `4`.
 
 ## Texto bíblico
 

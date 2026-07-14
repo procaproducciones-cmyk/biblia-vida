@@ -1,4 +1,4 @@
-BIBLIA VIDA v1.2.0 — PRUEBAS REALIZADAS
+BIBLIA VIDA v1.2.1 — PRUEBAS REALIZADAS
 =========================================
 Fecha: 13 de julio de 2026
 
@@ -7,8 +7,8 @@ RESULTADOS CORRECTOS
 [OK] Sintaxis de www/js/app.js validada con Node.js.
 [OK] Reina-Valera 1909 verificada: 66 libros, 1,189 capítulos y 31,102 versículos.
 [OK] HTML validado sin identificadores duplicados y con los controles de versión requeridos.
-[OK] package.json en versión 1.2.0.
-[OK] Android versionCode 3 y versionName 1.2.0.
+[OK] package.json en versión 1.2.1.
+[OK] Android versionCode 4 y versionName 1.2.1.
 [OK] Permiso android.permission.INTERNET agregado.
 [OK] Archivos web copiados y sincronizados con android/app/src/main/assets/public.
 [OK] Etiquetado de la segunda versión corregido a “Biblia del Oso 1569”.
@@ -21,7 +21,7 @@ COMPILACIÓN APK
 ---------------
 La compilación local no pudo completarse porque Gradle intentó descargar la distribución 8.14.3 y el entorno de ejecución no tenía resolución DNS hacia services.gradle.org.
 
-Esto no es un error del proyecto. El archivo .github/workflows/generar-apk.yml quedó actualizado para generar Biblia-Vida-v1.2.0.apk mediante GitHub Actions, y las guías incluidas explican el proceso.
+Esto no es un error del proyecto. El archivo .github/workflows/generar-apk.yml quedó actualizado para generar Biblia-Vida-v1.2.1.apk mediante GitHub Actions, y las guías incluidas explican el proceso.
 
 PRUEBA RECOMENDADA EN TELÉFONO
 ------------------------------

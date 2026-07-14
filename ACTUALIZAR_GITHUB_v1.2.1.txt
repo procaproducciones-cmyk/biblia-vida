@@ -1,0 +1,11 @@
+BIBLIA VIDA v1.2.1 — CORRECCIÓN DE BIBLIA DEL OSO
+
+1. Abre tu repositorio biblia-vida en GitHub.
+2. Add file > Upload files.
+3. Arrastra TODO el contenido de esta carpeta.
+4. Commit: Corregir carga Biblia del Oso v1.2.1
+5. En Actions espera el visto verde.
+6. Descarga el artefacto Biblia-Vida-APK.
+7. Desinstala la APK v1.2.0 del teléfono e instala Biblia-Vida-v1.2.1.apk.
+
+La Biblia del Oso ahora se incorpora dentro del APK durante la compilación y no se descarga en el teléfono.

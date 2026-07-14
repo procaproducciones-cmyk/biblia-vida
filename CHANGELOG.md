@@ -1,6 +1,6 @@
 # Historial de versiones
 
-## 1.2.0 — 13 de julio de 2026
+## 1.2.1 — 13 de julio de 2026
 
 - La segunda versión se presenta como **Biblia del Oso 1569**.
 - Se añadió el subtítulo **Sagradas Escrituras Versión Antigua** y la indicación de **ortografía actualizada**.
@@ -8,7 +8,7 @@
 - Mensajes de descarga y estado actualizados.
 - Créditos y aviso editorial ampliados para distinguir la edición digital del facsímil original de 1569.
 - Migración automática de ajustes, última lectura, favoritos, notas y caché desde el identificador provisional `rv1865` de la versión 1.1.0.
-- Android `versionCode 3` y `versionName 1.2.0`.
+- Android `versionCode 4` y `versionName 1.2.1`.
 
 ## 1.1.0 — 13 de julio de 2026
 
