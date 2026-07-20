@@ -1,29 +1,34 @@
-BIBLIA VIDA v1.2.2
+BIBLIA VIDA v1.2.4
 ==================
 
-Estado: Proyecto Android actualizado y listo para compilar.
+Estado: proyecto corregido y listo para compilar mediante GitHub Actions.
 
-Cambios integrados:
-- Selector entre Reina-Valera 1909 y Biblia del Oso 1569.
-- RVR 1909 incluida localmente.
-- Biblia del Oso 1569 (Sagradas Escrituras Versión Antigua, ortografía actualizada) descargable una vez desde GetBible API v2 y guardada en IndexedDB.
-- Favoritos, notas, búsqueda y última lectura compatibles con ambas versiones.
-- Cambio de versión conservando libro y capítulo.
-- Migración desde el identificador provisional rv1865 de v1.1.0.
-- Permiso INTERNET usado exclusivamente para la descarga opcional.
-- versionCode 5 / versionName 1.2.2.
+CAUSA ENCONTRADA
+----------------
+1. El proyecto fuente anterior no contenía www/data/biblia-oso1569.json.
+2. La versión 1.2.3 podía guardar en caché la respuesta HTTP 404 de ese archivo.
+3. Al actualizar, el service worker podía seguir entregando ese error antiguo.
 
-Comprobaciones realizadas:
-- Archivo RVR 1909 válido: 66 libros, 1,189 capítulos y 31,102 versículos.
-- Sintaxis JavaScript válida.
-- HTML sin identificadores duplicados.
-- Manifiesto Android con permiso INTERNET.
-- Proyecto Capacitor sincronizado con Android.
+CORRECCIONES INTEGRADAS
+-----------------------
+- Descarga automática de la fuente completa de la Biblia del Oso durante la compilación.
+- Descarga alternativa de los 66 libros por separado si falla el archivo completo.
+- Conversión y validación obligatoria: 66 libros, 1,189 capítulos y más de 30,000 versículos.
+- Copia física del archivo final dentro de los recursos Android y dentro del APK.
+- Verificación del contenido del APK antes de publicar el artefacto.
+- Caché actualizado a biblia-vida-v1.2.4.
+- Las respuestas HTTP fallidas ya no se guardan en caché.
+- El service worker se desactiva en la aplicación Android para evitar cachés antiguos.
+- versionCode 7 / versionName 1.2.4.
 
-Aclaración editorial:
-La versión visible como “Biblia del Oso 1569” corresponde al módulo digital sse, catalogado como “Sagradas Escrituras (1569)” y usado con ortografía actualizada. No se presenta como facsímil ni transcripción letra por letra de la impresión original. La propia ficha técnica del módulo describe su base digital como Reina-Valera 1865 con arreglos ortográficos; esta nota queda visible dentro de la aplicación y en AVISO_TEXTO_BIBLICO.md.
+PASO IMPORTANTE PARA LA PRUEBA
+-----------------------------
+Desinstala la versión 1.2.3 del teléfono antes de instalar la 1.2.4. La desinstalación elimina el caché 404 creado por la versión anterior.
 
-Para obtener otra APK:
-- Ejecutar ABRIR_EN_ANDROID_STUDIO.bat, o
-- seguir GUIA_GENERAR_APK.md, o
-- usar el flujo de GitHub Actions incluido.
+PARA GENERAR LA APK
+-------------------
+1. Sube todo el contenido del proyecto a GitHub, incluida la carpeta .github.
+2. Abre Actions > Generar APK Biblia Vida.
+3. Ejecuta el flujo y espera la marca verde.
+4. Descarga el artefacto Biblia-Vida-APK.
+5. Instala Biblia-Vida-v1.2.4.apk.

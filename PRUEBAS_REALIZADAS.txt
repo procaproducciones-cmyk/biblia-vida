@@ -1,34 +1,25 @@
-BIBLIA VIDA v1.2.2 — PRUEBAS REALIZADAS
-=========================================
-Fecha: 13 de julio de 2026
+BIBLIA VIDA v1.2.4 — COMPROBACIONES DEL PROYECTO
+================================================
+Fecha: 20 de julio de 2026
 
-RESULTADOS CORRECTOS
---------------------
+[OK] package.json y package-lock.json en versión 1.2.4.
+[OK] Android versionCode 7 y versionName 1.2.4.
 [OK] Sintaxis de www/js/app.js validada con Node.js.
-[OK] Reina-Valera 1909 verificada: 66 libros, 1,189 capítulos y 31,102 versículos.
-[OK] HTML validado sin identificadores duplicados y con los controles de versión requeridos.
-[OK] package.json en versión 1.2.2.
-[OK] Android versionCode 5 y versionName 1.2.2.
-[OK] Permiso android.permission.INTERNET agregado.
-[OK] Archivos web copiados y sincronizados con android/app/src/main/assets/public.
-[OK] Etiquetado de la segunda versión corregido a “Biblia del Oso 1569”.
-[OK] CSS con llaves balanceadas.
-[OK] Normalizador de la respuesta GetBible probado con una estructura completa de 66 libros, 1,189 capítulos y 31,102 versículos.
-[OK] npm ci completado sin vulnerabilidades reportadas.
-[OK] npx cap sync android completado correctamente.
+[OK] Sintaxis de www/sw.js validada con Node.js.
+[OK] Archivos web corregidos también en android/app/src/main/assets/public.
+[OK] RVR 1909 local presente.
+[OK] Rutas bíblicas usan versión de caché 1.2.4 y fetch sin caché HTTP.
+[OK] El service worker no registra respuestas bíblicas con estado HTTP fallido.
+[OK] El service worker se desregistra dentro de la aplicación Capacitor.
+[OK] El flujo de GitHub descarga la fuente completa o, como alternativa, los 66 libros.
+[OK] El flujo valida 66 libros, 1,189 capítulos y más de 30,000 versículos.
+[OK] El flujo comprueba que biblia-oso1569.json esté dentro del APK.
+[OK] El APK generado se nombra Biblia-Vida-v1.2.4.apk.
 
-COMPILACIÓN APK
----------------
-La compilación local no pudo completarse porque Gradle intentó descargar la distribución 8.14.3 y el entorno de ejecución no tenía resolución DNS hacia services.gradle.org.
-
-Esto no es un error del proyecto. El archivo .github/workflows/generar-apk.yml quedó actualizado para generar Biblia-Vida-v1.2.2.apk mediante GitHub Actions, y las guías incluidas explican el proceso.
-
-PRUEBA RECOMENDADA EN TELÉFONO
+PRUEBA OBLIGATORIA EN TELÉFONO
 ------------------------------
-1. Instalar la APK generada.
-2. Abrir la RVR 1909 y comprobar Juan 3:16.
-3. Con Internet, elegir “Biblia del Oso 1569”.
-4. Esperar la descarga inicial.
-5. Cerrar la aplicación, desactivar Internet y comprobar que la Oso 1569 sigue disponible.
-6. Crear un favorito y una nota en cada versión.
-7. Cambiar de versión en el mismo libro y capítulo.
+1. Desinstalar Biblia Vida 1.2.3 para eliminar el caché 404 antiguo.
+2. Instalar Biblia-Vida-v1.2.4.apk.
+3. Abrir la Biblia del Oso con Internet.
+4. Cerrar la aplicación, desactivar Internet y volver a abrirla.
+5. Confirmar que la Biblia del Oso continúa disponible sin conexión.

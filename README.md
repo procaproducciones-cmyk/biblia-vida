@@ -1,35 +1,34 @@
-# 📖 Biblia Vida v1.2.2
+# 📖 Biblia Vida v1.2.4
 
-Aplicación Android con **Reina-Valera 1909** incluida y **Biblia del Oso 1569 — Sagradas Escrituras Versión Antigua** disponible mediante una descarga opcional de una sola vez. La edición digital usa **ortografía actualizada**; después de descargarla puede leerse **sin conexión**, **sin publicidad**, **sin cuentas** y sin enviar favoritos o notas a servidores.
+Aplicación Android de lectura bíblica **sin publicidad**, con **Reina-Valera 1909** y **Biblia del Oso 1569 — Sagradas Escrituras Versión Antigua** incluidas dentro del APK para funcionar sin conexión.
 
 Proyecto desarrollado para **Proca Corporación**.
 
-## Novedad principal de la versión 1.2.2
+## Corrección principal de la versión 1.2.4
 
-- La segunda versión ahora se presenta al usuario como **Biblia del Oso 1569**.
-- Selector de versión en la bienvenida, el lector y los ajustes.
-- Cambio de versión conservando el mismo libro y capítulo cuando existe.
-- Reina-Valera 1909 incluida dentro de la instalación.
-- Biblia del Oso 1569 descargable una sola vez desde GetBible y guardada en el dispositivo mediante IndexedDB.
-- Favoritos, notas, búsqueda, versículo del día, compartir y última lectura identifican la versión bíblica activa.
-- Migración automática desde el identificador provisional `rv1865` usado en la versión 1.1.0.
-- La descarga opcional usa HTTPS y no requiere crear una cuenta.
+- Corrige el aviso que impedía abrir la Biblia del Oso.
+- La compilación descarga, convierte y valida los 66 libros antes de crear la APK.
+- Si falla la descarga completa, GitHub Actions obtiene los 66 libros por separado.
+- La compilación se detiene si el texto no contiene 66 libros, 1,189 capítulos y más de 30,000 versículos.
+- La Biblia del Oso queda incluida físicamente en `assets/public/data/biblia-oso1569.json` dentro de la APK.
+- El caché cambia a `biblia-vida-v1.2.4` y ya no almacena respuestas HTTP fallidas.
+- Dentro de la aplicación Android se desactiva el service worker, porque los recursos ya vienen en la APK y no deben conservar una pantalla o un error de una versión anterior.
+- Android: `versionName 1.2.4` y `versionCode 7`.
 
-> **Aclaración editorial:** la edición digital se cataloga como “Sagradas Escrituras (1569)” y se usa ampliamente con el nombre “Biblia del Oso 1569”. No es un facsímil ni una transcripción letra por letra de la impresión original. La ficha técnica del módulo `sse` describe su base digital como una Reina-Valera 1865 con arreglos ortográficos. La aplicación comunica esta diferencia en la sección **Ajustes → Texto bíblico**.
+> **Instalación de prueba:** desinstala primero la versión 1.2.3 y luego instala la 1.2.4. Esto elimina el caché 404 que pudo quedar guardado por la versión anterior.
 
 ## Funciones incluidas
 
 - Dos versiones bíblicas históricas seleccionables.
 - Lectura por libro y capítulo.
 - Navegación al capítulo anterior y siguiente.
-- Buscador local por palabras o frases en la versión activa.
+- Buscador local por palabras o frases.
 - Versículo del día.
 - Favoritos y notas personales por versión.
-- Copiar y compartir versículos incluyendo el nombre de la versión.
+- Copiar y compartir versículos.
 - Modo claro, oscuro o igual al sistema.
 - Tamaño de letra y espaciado configurables.
 - Última lectura independiente para cada versión.
-- Opción para mantener la pantalla encendida durante la lectura.
 - Diseño adaptable para teléfonos Android.
 - Sin anuncios, analítica ni rastreadores.
 
@@ -38,30 +37,37 @@ Proyecto desarrollado para **Proca Corporación**.
 - HTML, CSS y JavaScript.
 - Capacitor 8.
 - Proyecto Android nativo incluido.
-- Reina-Valera 1909 almacenada localmente en JSON.
-- Biblia del Oso 1569 normalizada desde GetBible API v2 (`sse`) y guardada localmente en IndexedDB.
+- Textos bíblicos almacenados localmente en JSON dentro del APK final.
 - Preferencias, favoritos y notas almacenados localmente en el dispositivo.
 
 ## Carpetas principales
 
 ```text
-BibliaVida-Android-v1.2.2/
-├── www/                    # Aplicación web móvil y texto RVR 1909
-├── android/                # Proyecto nativo Android
-├── resources/              # Icono y pantalla de inicio
+BibliaVida-Android-v1.2.4-Cache-Limpio/
+├── .github/workflows/     # Descarga, validación y compilación automática
+├── www/                   # Aplicación web y RVR 1909
+├── android/               # Proyecto nativo Android
+├── resources/             # Icono y pantalla de inicio
+├── scripts/               # Conversión y validación de la Biblia del Oso
 ├── capacitor.config.json
 ├── package.json
-└── GUIA_GENERAR_APK.md
+└── GUIA_SIN_ANDROID_STUDIO.md
 ```
 
-## Abrir el proyecto
+## Generar la APK
 
-Consulta **GUIA_GENERAR_APK.md**. El proyecto conserva el identificador `com.proca.bibliavida`, usa la versión `1.2.2` y el código de versión Android `5`.
+La forma recomendada es GitHub Actions. Consulta **GUIA_SIN_ANDROID_STUDIO.md**.
 
-## Texto bíblico
+La Biblia del Oso no está guardada en este ZIP fuente: el flujo automático la obtiene desde la fuente pública, la valida y la copia dentro de la APK antes de compilar. Si la descarga o la validación falla, GitHub mostrará el proceso en rojo y no entregará una APK incompleta.
 
-Consulta **AVISO_TEXTO_BIBLICO.md** para la identificación y procedencia de cada módulo.
+## Datos Android
 
-## Privacidad
+- Nombre: Biblia Vida
+- ID: `com.proca.bibliavida`
+- Versión: `1.2.4`
+- Código de versión: `7`
+- APK generada: `Biblia-Vida-v1.2.4.apk`
 
-Consulta **PRIVACIDAD.md**. La aplicación no incluye publicidad, analítica, cuentas ni servidores propios. El permiso de Internet se usa únicamente para la descarga opcional de la Biblia del Oso 1569; los favoritos, notas, configuración y progreso permanecen en el teléfono.
+## Texto bíblico y privacidad
+
+Consulta **AVISO_TEXTO_BIBLICO.md** y **PRIVACIDAD.md**. En la APK final ambas Biblias quedan disponibles sin conexión. El permiso de Internet permanece como mecanismo de recuperación únicamente si faltara el archivo local, pero el uso normal no requiere descargar la Biblia del Oso desde el teléfono.

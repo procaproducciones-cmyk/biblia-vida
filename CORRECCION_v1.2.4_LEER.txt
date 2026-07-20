@@ -1,0 +1,23 @@
+BIBLIA VIDA v1.2.4 — CORRECCIÓN DEFINITIVA DEL CACHÉ
+
+CAUSA ENCONTRADA
+La aplicación anterior podía guardar en caché la respuesta 404 del archivo biblia-oso1569.json.
+Aunque una compilación nueva ya incluyera el archivo, Android seguía leyendo el error viejo.
+
+CORRECCIONES
+1. Nuevo cache interno biblia-vida-v1.2.4.
+2. Limpieza automática de cachés de versiones anteriores.
+3. Rutas bíblicas con versión para evitar respuestas antiguas.
+4. El Service Worker no guarda errores HTTP.
+5. En la APK Android se desactiva el Service Worker para que no conserve archivos viejos.
+6. En la versión web, el nuevo Service Worker solo guarda respuestas correctas.
+7. versionCode 7 y versionName 1.2.4.
+
+PARA PROBAR CORRECTAMENTE
+1. Sube todo este proyecto a GitHub reemplazando los archivos anteriores.
+2. Espera que la acción Generar APK Biblia Vida termine en verde.
+3. Descarga el artefacto Biblia-Vida-APK.
+4. Desinstala del teléfono la versión 1.2.3 antes de instalar la 1.2.4. Esto elimina cualquier caché 404 antiguo.
+5. Instala Biblia-Vida-v1.2.4.apk y abre Biblia del Oso 1569.
+
+La acción de GitHub descarga, prepara, valida y coloca físicamente la Biblia del Oso dentro del APK.

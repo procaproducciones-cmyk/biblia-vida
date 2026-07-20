@@ -1,0 +1,10 @@
+BIBLIA VIDA v1.2.4 — SUBIR A GITHUB
+
+1. Descomprime esta carpeta.
+2. En tu repositorio de GitHub, sube todos los archivos y carpetas reemplazando los anteriores.
+3. Usa el mensaje del commit: Corregir caché Biblia del Oso v1.2.4
+4. Abre Actions > Generar APK Biblia Vida.
+5. Espera el resultado verde.
+6. Descarga el artefacto Biblia-Vida-APK.
+7. Desinstala la versión anterior del teléfono.
+8. Instala Biblia-Vida-v1.2.4.apk.

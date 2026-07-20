@@ -1,80 +1,46 @@
-# 📱 Guía para generar la APK de Biblia Vida
+# 📱 Generar Biblia Vida v1.2.4 con Android Studio
 
-## Requisitos en Windows
+## Importante antes de abrir Android Studio
 
-1. Instalar **Node.js**.
-2. Instalar **Android Studio** con el Android SDK.
-3. Descomprimir el proyecto en una carpeta fácil, por ejemplo:
+El ZIP fuente no trae `biblia-oso1569.json`. La forma recomendada es usar **GitHub Actions**, porque ese flujo descarga, convierte y valida el texto antes de sincronizar Android.
+
+Para una compilación manual, primero debes colocar un archivo válido en:
 
 ```text
-C:\BibliaVida
+www/data/biblia-oso1569.json
 ```
 
-## Preparar el proyecto
-
-Abre PowerShell o la terminal dentro de la carpeta y ejecuta:
+Después ejecuta:
 
 ```bash
-npm install
-npm run android:sync
-npm run android:open
+npm ci
+npx cap sync android
+npx cap open android
 ```
-
-El último comando abrirá el proyecto en Android Studio.
 
 ## Generar una APK de prueba
 
-Dentro de Android Studio:
-
-1. Espera a que termine la sincronización de Gradle.
-2. Abre el menú **Build**.
-3. Selecciona **Build APK(s)**.
-4. Al terminar, pulsa **locate** para abrir la carpeta del archivo.
-
-La salida normalmente queda en:
+1. Espera la sincronización de Gradle.
+2. Abre **Build → Build APK(s)**.
+3. La salida normalmente queda en:
 
 ```text
-android\app\build\outputs\apk\debug\app-debug.apk
+android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Esta APK sirve para probar e instalar manualmente.
+## Generar una versión firmada
 
-## Generar la APK firmada para distribuir
-
-Dentro de Android Studio:
-
-1. Ve a **Build → Generate Signed App Bundle or APK**.
-2. Selecciona **APK**.
-3. Crea un archivo de firma o selecciona uno existente.
-4. Guarda muy bien el archivo `.jks`, el alias y las contraseñas. Se necesitan para publicar futuras actualizaciones con la misma identidad.
-5. Selecciona la variante **release**.
-6. Finaliza el asistente.
-
-La APK firmada normalmente quedará en:
-
-```text
-android\app\build\outputs\apk\release\app-release.apk
-```
-
-## Publicar en Google Play
-
-Para Google Play se recomienda generar un **Android App Bundle (.aab)** desde el mismo asistente, seleccionando **Android App Bundle** en lugar de APK.
-
-## Después de modificar HTML, CSS, JavaScript o la Biblia
-
-Ejecuta nuevamente:
-
-```bash
-npm run android:sync
-```
-
-Después vuelve a compilar desde Android Studio.
+1. Abre **Build → Generate Signed App Bundle or APK**.
+2. Selecciona APK o Android App Bundle.
+3. Usa la firma permanente del proyecto.
+4. Conserva el `.jks`, el alias y las contraseñas.
+5. Compila la variante `release`.
 
 ## Datos actuales
 
 - Nombre: Biblia Vida
-- Versión: 1.2.2
-- Código de versión: 3
+- Versión: 1.2.4
+- Código de versión: 7
 - ID de aplicación: `com.proca.bibliavida`
 - Android mínimo: API 24
 - Android objetivo: API 36

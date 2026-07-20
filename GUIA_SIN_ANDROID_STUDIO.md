@@ -1,67 +1,57 @@
-# Generar la APK sin Android Studio
+# Generar Biblia Vida v1.2.4 sin Android Studio
 
-Esta versión de **Biblia Vida** ya incluye un flujo automático de GitHub Actions. GitHub compilará la aplicación en sus servidores y dejará la APK lista para descargar.
+GitHub Actions descargará y validará la Biblia del Oso, la incluirá dentro de la aplicación y compilará la APK.
 
-## Lo que necesitas
+## Paso 1. Preparar el repositorio
 
-- Una cuenta gratuita de GitHub.
-- Un navegador web.
-- El archivo ZIP de Biblia Vida descomprimido.
+1. Crea o abre tu repositorio `biblia-vida` en GitHub.
+2. Descomprime `BibliaVida-Android-v1.2.4-Cache-Limpio.zip`.
+3. Abre la carpeta `BibliaVida-Android-v1.2.4-Cache-Limpio`.
+4. Sube **todo el contenido interno**, incluida la carpeta oculta `.github`.
+5. En la raíz del repositorio deben verse `android`, `www`, `.github`, `scripts`, `package.json` y los demás archivos.
+6. Confirma la carga con **Commit changes**.
 
-No necesitas Android Studio ni instalar herramientas Android.
+> No subas únicamente la carpeta `www`. El flujo necesita también `.github`, `scripts`, `android`, `package.json` y `package-lock.json`.
 
-## Paso 1. Crear un repositorio
+## Paso 2. Generar la APK
 
-1. Entra a GitHub e inicia sesión.
-2. Pulsa **New repository**.
-3. Escribe como nombre: `biblia-vida`.
-4. Puedes dejarlo **Private** si no deseas publicar el código.
-5. No marques las opciones para crear README, .gitignore o licencia.
-6. Pulsa **Create repository**.
+1. Abre la pestaña **Actions**.
+2. Selecciona **Generar APK Biblia Vida**.
+3. Pulsa **Run workflow** y confirma con el botón verde.
+4. Espera a que todos los pasos tengan marca verde.
 
-## Paso 2. Subir el proyecto
+Durante el proceso, GitHub:
 
-1. Dentro del repositorio nuevo, pulsa **uploading an existing file**.
-2. Descomprime el ZIP de Biblia Vida en tu computadora.
-3. Abre la carpeta `BibliaVida-Android-v1.2.2`.
-4. Selecciona todo su contenido, incluida la carpeta `.github`.
-5. Arrastra los archivos al área de carga de GitHub.
-6. Espera a que termine la carga.
-7. En la parte inferior, pulsa **Commit changes**.
+- descarga la Biblia del Oso;
+- usa una descarga alternativa por 66 libros si la primera falla;
+- valida libros, capítulos y versículos;
+- sincroniza Capacitor;
+- comprueba que el archivo esté dentro de Android;
+- compila la APK;
+- vuelve a comprobar el archivo dentro de la APK terminada.
 
-> Importante: debes subir el contenido que está dentro de la carpeta, no la carpeta exterior completa. En la raíz del repositorio deben verse `android`, `www`, `.github`, `package.json` y los demás archivos.
+Si una validación falla, el proceso queda rojo y no entrega una APK incompleta.
 
-## Paso 3. Generar la APK
+## Paso 3. Descargar
 
-El primer proceso debe comenzar automáticamente después de subir los archivos.
+1. Abre la ejecución terminada en verde.
+2. Baja hasta **Artifacts**.
+3. Descarga **Biblia-Vida-APK**.
+4. Descomprime el archivo descargado.
+5. Encontrarás `Biblia-Vida-v1.2.4.apk`.
 
-1. Abre la pestaña **Actions** del repositorio.
-2. En el lado izquierdo, pulsa **Generar APK Biblia Vida**.
-3. Si no comenzó automáticamente, pulsa **Run workflow** y luego el botón verde **Run workflow**.
-4. Espera a que el proceso muestre una marca verde.
+## Paso 4. Instalar correctamente
 
-## Paso 4. Descargar la APK
+Para esta prueba concreta:
 
-1. Abre la ejecución que terminó con la marca verde.
-2. Baja hasta la sección **Artifacts**.
-3. Pulsa **Biblia-Vida-APK**.
-4. Se descargará un ZIP pequeño.
-5. Descomprímelo y encontrarás:
+1. Desinstala del teléfono Biblia Vida 1.2.3.
+2. Instala `Biblia-Vida-v1.2.4.apk`.
+3. Abre la aplicación.
+4. Selecciona **Biblia del Oso 1569**.
+5. Comprueba que abra inmediatamente, incluso sin conexión.
 
-`Biblia-Vida-v1.2.2.apk`
+La desinstalación previa es importante porque la 1.2.3 pudo guardar un error 404 en el caché del navegador interno.
 
-Ese archivo se puede enviar por WhatsApp, subir a tu página web o instalar en un teléfono Android.
+## Firma
 
-## Instalar en el teléfono
-
-1. Pasa el archivo APK al teléfono.
-2. Ábrelo desde Descargas o el administrador de archivos.
-3. Android puede pedir permiso para **Instalar aplicaciones desconocidas** desde el navegador o administrador de archivos usado.
-4. Activa el permiso solo para esa aplicación.
-5. Regresa y pulsa **Instalar**.
-
-## Nota sobre esta primera APK
-
-La APK generada por este flujo es una compilación **debug**, adecuada para probar la aplicación y compartir las primeras pruebas. Android la firma automáticamente con una clave de depuración.
-
-Antes del lanzamiento público definitivo prepararemos una APK de **release** firmada con una clave permanente de Proca Corporación. Esa clave debe conservarse siempre, porque Android usa la misma firma para permitir futuras actualizaciones de la aplicación.
+La APK de GitHub Actions es una compilación `debug`, útil para pruebas. Para publicar en Google Play debes generar un AAB o APK `release` con la misma firma permanente usada en versiones anteriores.

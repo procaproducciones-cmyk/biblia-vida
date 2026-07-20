@@ -1,43 +1,32 @@
 # Aviso sobre los textos bíblicos
 
-Biblia Vida v1.2.2 incluye o permite descargar las siguientes versiones:
+Biblia Vida v1.2.4 incluye dentro de la APK final estas versiones:
 
 ## Reina-Valera 1909
 
-La **Reina-Valera 1909** está identificada como texto de **dominio público**. Se integra localmente para permitir lectura y búsqueda sin conexión desde la primera apertura.
+Texto identificado como de dominio público e integrado localmente.
 
-Datos verificados en esta compilación:
+Datos verificados:
 
 - 66 libros.
 - 1,189 capítulos.
 - 31,102 versículos.
 
-Fuentes de referencia:
-
-- https://ebible.org/spaRV1909/
-- https://github.com/MaatheusGois/bible/tree/main/versions/es
-
 ## Biblia del Oso 1569 — Sagradas Escrituras Versión Antigua
 
-La segunda versión se obtiene bajo demanda desde el endpoint público de GetBible API v2 correspondiente al identificador `sse`.
+Durante la compilación, el flujo automático obtiene el módulo público `sse` de GetBible API v2, lo convierte al formato interno y comprueba que contenga:
 
-Identificación mostrada en Biblia Vida:
+- 66 libros;
+- 1,189 capítulos;
+- más de 30,000 versículos;
+- el contenido esperado en Génesis 1:1.
 
-- Nombre visible: **Biblia del Oso 1569**.
-- Subtítulo editorial: **Sagradas Escrituras Versión Antigua**.
-- Característica: **edición digital con ortografía actualizada**.
-- Nombre de catálogo del módulo: **Sagradas Escrituras (1569)**.
-- Licencia de distribución indicada por el módulo: **Public Domain**.
+La APK no se publica si el archivo está incompleto. Una vez validado, queda incluido en `assets/public/data/biblia-oso1569.json` y funciona sin conexión.
 
-### Nota de transparencia editorial
+### Transparencia editorial
 
-Esta edición digital no se presenta como un facsímil ni como una transcripción diplomática, letra por letra, de la impresión de Basilea de 1569. La ficha técnica del módulo `sse` describe el contenido digital como **“La Santa Biblia Reina-Valera (1865) con arreglos ortográficos”**. Por esa razón, la aplicación conserva el nombre solicitado y reconocido por los usuarios —**Biblia del Oso 1569**—, pero informa claramente que se trata de una edición digital de lectura con ortografía actualizada.
-
-Fuente del módulo:
-
-- https://api.getbible.net/v2/sse.json
-- https://github.com/getbible/v2
+La aplicación usa el nombre reconocido **Biblia del Oso 1569** y aclara que es una edición digital de lectura con ortografía actualizada. No se presenta como facsímil ni como transcripción letra por letra de la impresión original de Basilea.
 
 ## Código e identidad visual
 
-La interfaz, identidad visual, iconos propios y código específico de Biblia Vida pertenecen al proyecto de Proca Corporación, salvo las bibliotecas y recursos de terceros sujetos a sus licencias correspondientes.
+La interfaz, identidad visual, iconos propios y código específico de Biblia Vida pertenecen al proyecto de Proca Corporación, salvo bibliotecas y recursos de terceros sujetos a sus respectivas licencias.

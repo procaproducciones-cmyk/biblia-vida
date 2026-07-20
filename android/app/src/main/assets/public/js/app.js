@@ -1,5 +1,8 @@
 'use strict';
 
+const APP_VERSION = '1.2.4';
+const APP_CACHE_PREFIX = 'biblia-vida-v';
+
 const STORAGE = {
   settings: 'bv_settings',
   favorites: 'bv_favorites',
@@ -19,7 +22,7 @@ const BIBLE_VERSIONS = {
     name: 'Reina-Valera 1909',
     icon: '📘',
     source: 'local',
-    path: 'data/biblia-rv1909.json',
+    path: `data/biblia-rv1909.json?v=${APP_VERSION}`,
     description: 'Versión clásica en español incluida dentro de la aplicación.'
   },
   oso1569: {
@@ -28,7 +31,7 @@ const BIBLE_VERSIONS = {
     name: 'Biblia del Oso 1569',
     icon: '🐻',
     source: 'local',
-    path: 'data/biblia-oso1569.json',
+    path: `data/biblia-oso1569.json?v=${APP_VERSION}`,
     url: 'https://api.getbible.net/v2/sse.json',
     description: 'Sagradas Escrituras Versión Antigua (1569), edición digital de lectura con ortografía actualizada. Viene incluida dentro de la aplicación y funciona sin conexión.'
   }
@@ -1091,7 +1094,7 @@ async function loadBibleVersion(versionId, options = {}) {
 
   if (config.source === 'local') {
     try {
-      const response = await fetch(config.path, { cache: 'force-cache' });
+      const response = await fetch(config.path, { cache: 'no-store' });
       if (!response.ok) throw new Error(`No se pudo cargar la Biblia (${response.status})`);
       const bible = await response.json();
       if (!Array.isArray(bible.books) || bible.books.length !== 66) throw new Error('El archivo bíblico no es válido');
@@ -1136,7 +1139,7 @@ async function loadBibleVersion(versionId, options = {}) {
   }
 
   if (config.source === 'bundled') {
-    const response = await fetch(config.path, { cache: 'force-cache' });
+    const response = await fetch(config.path, { cache: 'no-store' });
     if (!response.ok) throw new Error(`No se pudo abrir la Biblia del Oso (${response.status})`);
     const payload = await response.json();
     const bible = normalizeGetBibleTranslation(payload);
@@ -1246,7 +1249,7 @@ async function switchBible(versionId, options = {}) {
     state.bookIndex = previousBookIndex;
     state.chapter = previousChapter;
     syncVersionSelects();
-    window.alert('No se pudo abrir la Biblia del Oso 1569 incluida en la aplicación. Cierra y vuelve a abrir la app.');
+    showToast('No se pudo activar la Biblia del Oso. Se mantuvo la versión anterior.');
     return false;
   } finally {
     state.versionSwitching = false;
@@ -1263,11 +1266,27 @@ function showLoadError(error) {
     <button class="btn btn-gold" style="margin-top:20px" onclick="location.reload()">Intentar de nuevo</button>`;
 }
 
+async function clearStaleAppCaches() {
+  if (!('caches' in window)) return;
+  try {
+    const currentCache = `${APP_CACHE_PREFIX}${APP_VERSION}`;
+    const keys = await caches.keys();
+    await Promise.all(
+      keys
+        .filter((key) => key.startsWith(APP_CACHE_PREFIX) && key !== currentCache)
+        .map((key) => caches.delete(key))
+    );
+  } catch (error) {
+    console.warn('No se pudieron limpiar cachés anteriores:', error);
+  }
+}
+
 async function init() {
   hydrateIcons();
   migrateSavedCollections();
   bindEvents();
   applySettings();
+  await clearStaleAppCaches();
 
   try {
     const rvBible = await loadBibleVersion('rv1909');
