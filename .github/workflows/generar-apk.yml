@@ -2,61 +2,142 @@ name: Generar APK Biblia Vida
 
 on:
   workflow_dispatch:
-
   push:
     branches:
       - main
+      - master
 
 permissions:
   contents: read
 
 jobs:
-
   compilar-apk:
-
     name: Compilar APK Android
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Descargar proyecto
         uses: actions/checkout@v4
 
       - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
+          cache: 'npm'
 
       - name: Instalar dependencias
+        run: npm ci
+
+      - name: Descargar y preparar Biblia del Oso 1569
+        shell: bash
         run: |
-          npm config set registry https://registry.npmjs.org/
-          rm -f package-lock.json
-          npm install --no-audit --no-fund
+          set -euo pipefail
+          mkdir -p www/data
+
+          descargar_completa() {
+            echo "Intentando descargar la traducción completa…"
+            curl --fail --location \
+              --retry 5 --retry-all-errors --retry-delay 4 \
+              --connect-timeout 30 --max-time 420 \
+              --user-agent "Biblia-Vida/1.2.4" \
+              "https://api.getbible.net/v2/sse.json" \
+              --output /tmp/biblia-oso1569-api.json
+          }
+
+          descargar_por_libros() {
+            echo "La descarga completa falló; descargando los 66 libros por separado…"
+            rm -f /tmp/biblia-oso1569-api.json
+            printf '[' > /tmp/biblia-oso1569-api.json
+            for libro in $(seq 1 66); do
+              temporal="/tmp/biblia-oso-libro-${libro}.json"
+              curl --fail --location \
+                --retry 5 --retry-all-errors --retry-delay 3 \
+                --connect-timeout 30 --max-time 180 \
+                --user-agent "Biblia-Vida/1.2.4" \
+                "https://api.getbible.net/v2/sse/${libro}.json" \
+                --output "$temporal"
+              if [ "$libro" -gt 1 ]; then printf ',' >> /tmp/biblia-oso1569-api.json; fi
+              cat "$temporal" >> /tmp/biblia-oso1569-api.json
+            done
+            printf ']' >> /tmp/biblia-oso1569-api.json
+          }
+
+          if ! descargar_completa; then
+            descargar_por_libros
+          fi
+
+          if ! node scripts/preparar-biblia-oso.js \
+            /tmp/biblia-oso1569-api.json \
+            www/data/biblia-oso1569.json \
+            www/data/biblia-rv1909.json; then
+            echo "La fuente completa no pudo convertirse; se intentará por libros."
+            descargar_por_libros
+            node scripts/preparar-biblia-oso.js \
+              /tmp/biblia-oso1569-api.json \
+              www/data/biblia-oso1569.json \
+              www/data/biblia-rv1909.json
+          fi
+
+          test -s www/data/biblia-oso1569.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const file = 'www/data/biblia-oso1569.json';
+          const bible = JSON.parse(fs.readFileSync(file, 'utf8'));
+          if (bible.books?.length !== 66) throw new Error('El archivo final no contiene 66 libros.');
+          const chapters = bible.books.reduce((sum, book) => sum + book.chapters.length, 0);
+          const verses = bible.books.reduce(
+            (sum, book) => sum + book.chapters.reduce((chapterSum, chapter) => chapterSum + chapter.length, 0),
+            0
+          );
+          if (chapters !== 1189) throw new Error(`El archivo final contiene ${chapters} capítulos.`);
+          if (verses < 30000) throw new Error(`El archivo final contiene solo ${verses} versículos.`);
+          console.log(`Archivo final validado: ${bible.books.length} libros, ${chapters} capítulos y ${verses} versículos.`);
+          console.log(`Génesis 1:1: ${bible.books[0].chapters[0][0]}`);
+          NODE
 
       - name: Sincronizar Capacitor
         run: npx cap sync android
+
+      - name: Verificar Biblia dentro de los recursos Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s android/app/src/main/assets/public/data/biblia-oso1569.json
+          ls -lh android/app/src/main/assets/public/data/biblia-oso1569.json
 
       - name: Preparar Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: '21'
+          cache: gradle
 
       - name: Dar permiso a Gradle
         run: chmod +x android/gradlew
 
-      - name: Compilar APK
+      - name: Compilar APK de prueba
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: ./gradlew assembleDebug --stacktrace
 
-      - name: Preparar APK
+      - name: Verificar Biblia dentro del APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          unzip -l "$APK" | grep -q "assets/public/data/biblia-oso1569.json"
+          unzip -p "$APK" assets/public/data/biblia-oso1569.json | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{const b=JSON.parse(s);if(b.books?.length!==66)process.exit(1);console.log('Biblia validada dentro del APK:',b.books.length,'libros');});"
+          unzip -p "$APK" assets/public/sw.js | grep -q "biblia-vida-v1.2.4"
+          echo "La Biblia del Oso y el caché v1.2.4 están incluidos físicamente dentro del APK."
+
+      - name: Renombrar APK
         run: |
           mkdir -p salida
-          cp android/app/build/outputs/apk/debug/app-debug.apk salida/Biblia-Vida-v1.0.0.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk salida/Biblia-Vida-v1.2.4.apk
 
-      - name: Guardar APK
+      - name: Guardar APK para descargar
         uses: actions/upload-artifact@v4
         with:
           name: Biblia-Vida-APK
-          path: salida/Biblia-Vida-v1.0.0.apk
+          path: salida/Biblia-Vida-v1.2.4.apk
+          if-no-files-found: error
+          retention-days: 30
