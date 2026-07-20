@@ -1,0 +1,192 @@
+name: Generar AAB Biblia Vida para Google Play
+run-name: AAB Play Store v1.2.4 - ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compilar-aab:
+    name: Compilar AAB firmado
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Preparar npm para GitHub
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm config set registry https://registry.npmjs.org/
+          npm config set fetch-retries 5
+          npm config set fetch-retry-mintimeout 20000
+          npm config set fetch-retry-maxtimeout 120000
+          npm config set fetch-timeout 300000
+          npm cache clean --force
+          rm -rf node_modules package-lock.json
+          echo "Node: $(node --version)"
+          echo "npm: $(npm --version)"
+
+      - name: Instalar dependencias
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-package-lock --no-audit --no-fund --prefer-online
+
+      - name: Descargar y preparar Biblia del Oso 1569
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p www/data
+
+          descargar_completa() {
+            echo "Intentando descargar la traducción completa..."
+            curl --fail --location \
+              --retry 5 --retry-all-errors --retry-delay 4 \
+              --connect-timeout 30 --max-time 420 \
+              --user-agent "Biblia-Vida/1.2.4" \
+              "https://api.getbible.net/v2/sse.json" \
+              --output /tmp/biblia-oso1569-api.json
+          }
+
+          descargar_por_libros() {
+            echo "Descargando los 66 libros por separado..."
+            rm -f /tmp/biblia-oso1569-api.json
+            printf '[' > /tmp/biblia-oso1569-api.json
+            for libro in $(seq 1 66); do
+              temporal="/tmp/biblia-oso-libro-${libro}.json"
+              curl --fail --location \
+                --retry 5 --retry-all-errors --retry-delay 3 \
+                --connect-timeout 30 --max-time 180 \
+                --user-agent "Biblia-Vida/1.2.4" \
+                "https://api.getbible.net/v2/sse/${libro}.json" \
+                --output "$temporal"
+              if [ "$libro" -gt 1 ]; then printf ',' >> /tmp/biblia-oso1569-api.json; fi
+              cat "$temporal" >> /tmp/biblia-oso1569-api.json
+            done
+            printf ']' >> /tmp/biblia-oso1569-api.json
+          }
+
+          if ! descargar_completa; then
+            descargar_por_libros
+          fi
+
+          if ! node scripts/preparar-biblia-oso.js \
+            /tmp/biblia-oso1569-api.json \
+            www/data/biblia-oso1569.json \
+            www/data/biblia-rv1909.json; then
+            echo "La fuente completa no pudo convertirse; se intentará por libros."
+            descargar_por_libros
+            node scripts/preparar-biblia-oso.js \
+              /tmp/biblia-oso1569-api.json \
+              www/data/biblia-oso1569.json \
+              www/data/biblia-rv1909.json
+          fi
+
+          test -s www/data/biblia-oso1569.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const file = 'www/data/biblia-oso1569.json';
+          const bible = JSON.parse(fs.readFileSync(file, 'utf8'));
+          if (bible.books?.length !== 66) throw new Error('El archivo final no contiene 66 libros.');
+          const chapters = bible.books.reduce((sum, book) => sum + book.chapters.length, 0);
+          const verses = bible.books.reduce(
+            (sum, book) => sum + book.chapters.reduce((chapterSum, chapter) => chapterSum + chapter.length, 0),
+            0
+          );
+          if (chapters !== 1189) throw new Error(`El archivo final contiene ${chapters} capítulos.`);
+          if (verses < 30000) throw new Error(`El archivo final contiene solo ${verses} versículos.`);
+          console.log(`Biblia validada: ${bible.books.length} libros, ${chapters} capítulos y ${verses} versículos.`);
+          NODE
+
+      - name: Sincronizar Capacitor
+        run: npx cap sync android
+
+      - name: Verificar Biblia en los recursos Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s android/app/src/main/assets/public/data/biblia-oso1569.json
+          ls -lh android/app/src/main/assets/public/data/biblia-oso1569.json
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Restaurar llave privada de subida
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.BIBLIA_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "Falta el secreto BIBLIA_KEYSTORE_BASE64."
+            exit 1
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/BibliaVida-upload-key.jks"
+          test -s "$RUNNER_TEMP/BibliaVida-upload-key.jks"
+          chmod 600 "$RUNNER_TEMP/BibliaVida-upload-key.jks"
+
+      - name: Dar permiso a Gradle
+        run: chmod +x android/gradlew
+
+      - name: Compilar Android App Bundle
+        working-directory: android
+        run: ./gradlew bundleRelease --stacktrace
+
+      - name: Firmar AAB para Google Play
+        shell: bash
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.BIBLIA_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.BIBLIA_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.BIBLIA_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          AAB="android/app/build/outputs/bundle/release/app-release.aab"
+          test -s "$AAB"
+          jarsigner \
+            -verbose \
+            -sigalg SHA256withRSA \
+            -digestalg SHA-256 \
+            -keystore "$RUNNER_TEMP/BibliaVida-upload-key.jks" \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            "$AAB" "$KEY_ALIAS"
+
+      - name: Verificar firma y contenido del AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB="android/app/build/outputs/bundle/release/app-release.aab"
+          jarsigner -verify -verbose -certs "$AAB"
+          unzip -l "$AAB" | grep -q "base/assets/public/data/biblia-oso1569.json"
+          unzip -p "$AAB" base/assets/public/data/biblia-oso1569.json | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{const b=JSON.parse(s);if(b.books?.length!==66)process.exit(1);console.log('Biblia del Oso validada dentro del AAB:',b.books.length,'libros');});"
+          echo "AAB firmado y validado correctamente."
+
+      - name: Preparar archivo final
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p salida
+          cp android/app/build/outputs/bundle/release/app-release.aab \
+            salida/Biblia-Vida-v1.2.4-release.aab
+          ls -lh salida/Biblia-Vida-v1.2.4-release.aab
+
+      - name: Guardar AAB para descargar
+        uses: actions/upload-artifact@v4
+        with:
+          name: Biblia-Vida-AAB-Play-Store
+          path: salida/Biblia-Vida-v1.2.4-release.aab
+          if-no-files-found: error
+          retention-days: 30
